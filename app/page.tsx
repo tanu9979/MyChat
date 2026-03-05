@@ -1,10 +1,10 @@
-import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { SignInButton, Show } from "@clerk/nextjs";
 import { ChatInterface } from "@/components/ChatInterface";
 
 export default function Home() {
   return (
     <div className="h-screen">
-      <SignedOut>
+      <Show when="signed-out">
         <div className="flex h-full items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
           <div className="text-center space-y-6 p-8">
             <h1 className="text-4xl font-bold text-gray-900">Welcome to MyChat</h1>
@@ -16,10 +16,10 @@ export default function Home() {
             </SignInButton>
           </div>
         </div>
-      </SignedOut>
-      <SignedIn>
+      </Show>
+      <Show when="signed-in">
         <ChatInterface />
-      </SignedIn>
+      </Show>
     </div>
   );
 }
