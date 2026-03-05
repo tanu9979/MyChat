@@ -120,7 +120,7 @@ export const getMessages = query({
           if (!acc[reaction.emoji]) {
             acc[reaction.emoji] = [];
           }
-          acc[reaction.emoji].push(reaction.userId);
+          acc[reaction.emoji].push(reaction.userId as string);
           return acc;
         }, {} as Record<string, string[]>);
 
