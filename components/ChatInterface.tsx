@@ -16,9 +16,16 @@ export function ChatInterface() {
   const [isMobile, setIsMobile] = useState(false);
 
   const syncUser = useMutation(api.mutations.syncUser);
+  const createConversation = useMutation(api.mutations.createConversation);
   const currentUser = useQuery(
     api.queries.getCurrentUser,
     user?.id ? { clerkId: user.id } : "skip"
+  );
+  const existingConversation = useQuery(
+    api.queries.getConversation,
+    selectedConversationId === null && showUserList === false
+      ? "skip"
+      : { participantIds: [] }
   );
 
   useEffect(() => {
@@ -69,10 +76,12 @@ export function ChatInterface() {
           {showUserList ? (
             <UserList
               currentUserId={currentUser._id}
-              onSelectUser={(otherUserId) => {
-                setSelectedConversationId(null);
+              onSelectUser={async (otherUserId) => {
+                const conv = await createConversation({
+                  participantIds: [currentUser._id, otherUserId],
+                });
+                setSelectedConversationId(conv);
                 setShowUserList(false);
-                // Will create conversation in ChatWindow
               }}
             />
           ) : (
