@@ -8,24 +8,30 @@ import { Id } from "@/convex/_generated/dataModel";
 import { UserList } from "./UserList";
 import { ConversationList } from "./ConversationList";
 import { ChatWindow } from "./ChatWindow";
+import { UserButton } from "@clerk/nextjs";
+import { CreateGroup } from "./CreateGroup";
 
 export function ChatInterface() {
   const { user } = useUser();
   const [selectedConversationId, setSelectedConversationId] = useState<Id<"conversations"> | null>(null);
-  const [showUserList, setShowUserList] = useState(false);
+  const [view, setView] = useState<"conversations" | "newchat" | "creategroup" | "profile">("conversations");
   const [isMobile, setIsMobile] = useState(false);
 
   const syncUser = useMutation(api.mutations.syncUser);
   const createConversation = useMutation(api.mutations.createConversation);
+  const createGroupConversation = useMutation(api.mutations.createGroupConversation);
+  const unhideConversation = useMutation(api.mutations.unhideConversation);
   const currentUser = useQuery(
     api.queries.getCurrentUser,
     user?.id ? { clerkId: user.id } : "skip"
   );
-  const existingConversation = useQuery(
-    api.queries.getConversation,
-    selectedConversationId === null && showUserList === false
-      ? "skip"
-      : { participantIds: [] }
+  const conversations = useQuery(
+    api.queries.getUserConversations,
+    currentUser ? { userId: currentUser._id } : "skip"
+  );
+  const allConversations = useQuery(
+    api.queries.getAllConversations,
+    currentUser ? { userId: currentUser._id } : "skip"
   );
 
   useEffect(() => {
@@ -57,39 +63,145 @@ export function ChatInterface() {
     );
   }
 
-  const showChat = selectedConversationId && (!isMobile || !showUserList);
+  const selectedConversation = conversations?.find(c => c._id === selectedConversationId);
+  const showChat = selectedConversationId && (!isMobile || view === "conversations");
   const showSidebar = !isMobile || !selectedConversationId;
 
   return (
     <div className="flex h-screen bg-gray-100">
+      {/* Left Sidebar */}
+      <div className="w-16 bg-gray-900 flex flex-col items-center py-4 gap-4">
+        <button
+          onClick={() => { setView("conversations"); setSelectedConversationId(null); }}
+          className={`w-12 h-12 rounded-lg flex items-center justify-center transition ${
+            view === "conversations" ? "bg-blue-600 text-white" : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+          }`}
+          title="Conversations"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+        </button>
+        <button
+          onClick={() => { setView("newchat"); setSelectedConversationId(null); }}
+          className={`w-12 h-12 rounded-lg flex items-center justify-center transition ${
+            view === "newchat" ? "bg-blue-600 text-white" : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+          }`}
+          title="New Chat"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+        </button>
+        <button
+          onClick={() => { setView("creategroup"); setSelectedConversationId(null); }}
+          className={`w-12 h-12 rounded-lg flex items-center justify-center transition ${
+            view === "creategroup" ? "bg-blue-600 text-white" : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+          }`}
+          title="Create Group"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+        </button>
+        <button
+          onClick={() => { setView("profile"); setSelectedConversationId(null); }}
+          className={`w-12 h-12 rounded-lg flex items-center justify-center transition ${
+            view === "profile" ? "bg-blue-600 text-white" : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+          }`}
+          title="Profile"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Main Content Area */}
       {showSidebar && (
         <div className={`${isMobile ? "w-full" : "w-80"} bg-white border-r flex flex-col`}>
-          <div className="p-4 border-b flex items-center justify-between">
-            <h1 className="text-xl font-bold">MyChat</h1>
-            <button
-              onClick={() => setShowUserList(!showUserList)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
-            >
-              {showUserList ? "Conversations" : "New Chat"}
-            </button>
+          <div className="p-4 border-b">
+            <h1 className="text-xl font-bold">
+              {view === "conversations" && "Conversations"}
+              {view === "newchat" && "New Chat"}
+              {view === "creategroup" && "Create Group"}
+              {view === "profile" && "Profile"}
+            </h1>
           </div>
-          {showUserList ? (
-            <UserList
-              currentUserId={currentUser._id}
-              onSelectUser={async (otherUserId) => {
-                const conv = await createConversation({
-                  participantIds: [currentUser._id, otherUserId],
-                });
-                setSelectedConversationId(conv);
-                setShowUserList(false);
-              }}
-            />
-          ) : (
+          {view === "conversations" && (
             <ConversationList
               currentUserId={currentUser._id}
               selectedConversationId={selectedConversationId}
               onSelectConversation={setSelectedConversationId}
             />
+          )}
+          {view === "newchat" && (
+            <UserList
+              currentUserId={currentUser._id}
+              onSelectUser={async (otherUserId) => {
+                const existing = allConversations?.find(
+                  (conv) =>
+                    !conv.isGroup &&
+                    conv.participants.length === 2 &&
+                    conv.participants.includes(otherUserId)
+                );
+                
+                if (existing) {
+                  await unhideConversation({ conversationId: existing._id, userId: currentUser._id });
+                  setSelectedConversationId(existing._id);
+                } else {
+                  const conv = await createConversation({
+                    participantIds: [currentUser._id, otherUserId],
+                  });
+                  setSelectedConversationId(conv);
+                }
+                setView("conversations");
+              }}
+            />
+          )}
+          {view === "creategroup" && (
+            <CreateGroup
+              currentUserId={currentUser._id}
+              onCreateGroup={async (participantIds, groupName) => {
+                const conv = await createGroupConversation({
+                  participantIds,
+                  groupName,
+                });
+                setSelectedConversationId(conv);
+                setView("conversations");
+              }}
+            />
+          )}
+          {view === "profile" && (
+            <div className="flex-1 flex items-center justify-center p-8">
+              <div className="text-center">
+                <div className="mb-6 flex justify-center">
+                  {currentUser.imageUrl ? (
+                    <img
+                      src={currentUser.imageUrl}
+                      alt={currentUser.name}
+                      className="w-24 h-24 rounded-full"
+                    />
+                  ) : (
+                    <div className="w-24 h-24 rounded-full bg-blue-600 flex items-center justify-center text-white text-3xl font-semibold">
+                      {currentUser.name[0]}
+                    </div>
+                  )}
+                </div>
+                <h2 className="text-xl font-semibold mb-2">{currentUser.name}</h2>
+                <p className="text-gray-600 mb-6">{currentUser.email}</p>
+                <div className="flex justify-center">
+                  <UserButton
+                    appearance={{
+                      elements: {
+                        avatarBox: "w-12 h-12",
+                      },
+                    }}
+                  />
+                </div>
+                <p className="text-sm text-gray-500 mt-4">Click to manage your account</p>
+              </div>
+            </div>
           )}
         </div>
       )}
@@ -97,17 +209,24 @@ export function ChatInterface() {
         <ChatWindow
           conversationId={selectedConversationId}
           currentUserId={currentUser._id}
+          conversation={selectedConversation}
           onBack={isMobile ? () => setSelectedConversationId(null) : undefined}
         />
       ) : (
         !isMobile && (
           <div className="flex-1 flex items-center justify-center text-gray-500">
-            <div className="text-center">
-              <svg className="w-24 h-24 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-              </svg>
-              <p className="text-lg">Select a conversation to start chatting</p>
-            </div>
+            {view === "conversations" ? (
+              <div className="text-center">
+                <svg className="w-24 h-24 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                <p className="text-lg">Select a conversation to start chatting</p>
+              </div>
+            ) : (
+              <div className="text-center">
+                <p className="text-lg">Use the sidebar to navigate</p>
+              </div>
+            )}
           </div>
         )
       )}

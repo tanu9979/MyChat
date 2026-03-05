@@ -79,6 +79,7 @@ export const createConversation = mutation({
       participants: args.participantIds,
       isGroup: false,
       lastMessageTime: Date.now(),
+      hiddenFor: [],
     });
   },
 });
@@ -94,6 +95,7 @@ export const createGroupConversation = mutation({
       isGroup: true,
       groupName: args.groupName,
       lastMessageTime: Date.now(),
+      hiddenFor: [],
     });
   },
 });
@@ -222,6 +224,24 @@ export const deleteMessage = mutation({
   },
 });
 
+export const hideMessage = mutation({
+  args: {
+    messageId: v.id("messages"),
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const message = await ctx.db.get(args.messageId);
+    if (!message) return;
+    
+    const hiddenFor = message.hiddenFor || [];
+    if (!hiddenFor.includes(args.userId)) {
+      await ctx.db.patch(args.messageId, {
+        hiddenFor: [...hiddenFor, args.userId],
+      });
+    }
+  },
+});
+
 // Reactions
 export const toggleReaction = mutation({
   args: {
@@ -246,6 +266,140 @@ export const toggleReaction = mutation({
         userId: args.userId,
         emoji: args.emoji,
         timestamp: Date.now(),
+      });
+    }
+  },
+});
+
+// Admin/Testing - Clear all conversations
+export const clearAllConversations = mutation({
+  args: {},
+  handler: async (ctx) => {
+    // Delete all messages
+    const messages = await ctx.db.query("messages").collect();
+    for (const msg of messages) {
+      await ctx.db.delete(msg._id);
+    }
+
+    // Delete all reactions
+    const reactions = await ctx.db.query("reactions").collect();
+    for (const reaction of reactions) {
+      await ctx.db.delete(reaction._id);
+    }
+
+    // Delete all typing indicators
+    const indicators = await ctx.db.query("typingIndicators").collect();
+    for (const indicator of indicators) {
+      await ctx.db.delete(indicator._id);
+    }
+
+    // Delete all conversations
+    const conversations = await ctx.db.query("conversations").collect();
+    for (const conv of conversations) {
+      await ctx.db.delete(conv._id);
+    }
+
+    return { deleted: { conversations: conversations.length, messages: messages.length } };
+  },
+});
+
+// Hide conversation (soft delete for user)
+export const hideConversation = mutation({
+  args: {
+    conversationId: v.id("conversations"),
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const conversation = await ctx.db.get(args.conversationId);
+    if (!conversation) return;
+
+    // Hide all messages in this conversation for the user
+    const messages = await ctx.db
+      .query("messages")
+      .withIndex("by_conversation", (q) => q.eq("conversationId", args.conversationId))
+      .collect();
+    
+    for (const msg of messages) {
+      const hiddenFor = msg.hiddenFor || [];
+      if (!hiddenFor.includes(args.userId)) {
+        await ctx.db.patch(msg._id, {
+          hiddenFor: [...hiddenFor, args.userId],
+        });
+      }
+    }
+
+    // Hide the conversation
+    const convHiddenFor = conversation.hiddenFor || [];
+    if (!convHiddenFor.includes(args.userId)) {
+      await ctx.db.patch(args.conversationId, {
+        hiddenFor: [...convHiddenFor, args.userId],
+      });
+    }
+  },
+});
+
+// Fix old conversations without hiddenFor field
+export const fixOldConversations = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const conversations = await ctx.db.query("conversations").collect();
+    for (const conv of conversations) {
+      if (conv.hiddenFor === undefined) {
+        await ctx.db.patch(conv._id, { hiddenFor: [] });
+      }
+    }
+  },
+});
+
+// Unhide conversation
+export const unhideConversation = mutation({
+  args: {
+    conversationId: v.id("conversations"),
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const conversation = await ctx.db.get(args.conversationId);
+    if (!conversation) return;
+
+    // Unhide the conversation
+    const hiddenFor = conversation.hiddenFor || [];
+    const newHiddenFor = hiddenFor.filter((id) => id !== args.userId);
+    
+    await ctx.db.patch(args.conversationId, {
+      hiddenFor: newHiddenFor,
+    });
+
+    // Unhide all messages in this conversation for the user
+    const messages = await ctx.db
+      .query("messages")
+      .withIndex("by_conversation", (q) => q.eq("conversationId", args.conversationId))
+      .collect();
+    
+    for (const msg of messages) {
+      const msgHiddenFor = msg.hiddenFor || [];
+      if (msgHiddenFor.includes(args.userId)) {
+        await ctx.db.patch(msg._id, {
+          hiddenFor: msgHiddenFor.filter((id) => id !== args.userId),
+        });
+      }
+    }
+  },
+});
+
+// Edit message
+export const editMessage = mutation({
+  args: {
+    messageId: v.id("messages"),
+    userId: v.id("users"),
+    content: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const message = await ctx.db.get(args.messageId);
+    if (message && message.senderId === args.userId && !message.isDeleted) {
+      await ctx.db.patch(args.messageId, {
+        content: args.content,
+        isEdited: true,
+        editedAt: Date.now(),
       });
     }
   },

@@ -16,6 +16,7 @@ export default defineSchema({
     isGroup: v.boolean(),
     groupName: v.optional(v.string()),
     lastMessageTime: v.optional(v.number()),
+    hiddenFor: v.optional(v.array(v.id("users"))),
   }).index("by_last_message", ["lastMessageTime"]),
 
   messages: defineTable({
@@ -26,6 +27,9 @@ export default defineSchema({
     readBy: v.array(v.id("users")),
     isDeleted: v.boolean(),
     deletedAt: v.optional(v.number()),
+    isEdited: v.optional(v.boolean()),
+    editedAt: v.optional(v.number()),
+    hiddenFor: v.optional(v.array(v.id("users"))),
   })
     .index("by_conversation", ["conversationId"])
     .index("by_sender", ["senderId"]),

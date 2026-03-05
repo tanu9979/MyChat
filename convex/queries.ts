@@ -52,8 +52,11 @@ export const getUserConversations = query({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
     const conversations = await ctx.db.query("conversations").collect();
-    const userConversations = conversations.filter((conv) =>
-      conv.participants.includes(args.userId)
+    const userConversations = conversations.filter(
+      (conv) => {
+        const hiddenFor = conv.hiddenFor || [];
+        return conv.participants.includes(args.userId) && !hiddenFor.includes(args.userId);
+      }
     );
 
     const enriched = await Promise.all(
@@ -99,7 +102,10 @@ export const getUserConversations = query({
 
 // Message Queries
 export const getMessages = query({
-  args: { conversationId: v.id("conversations") },
+  args: { 
+    conversationId: v.id("conversations"),
+    userId: v.id("users"),
+  },
   handler: async (ctx, args) => {
     const messages = await ctx.db
       .query("messages")
@@ -108,8 +114,13 @@ export const getMessages = query({
       )
       .collect();
 
+    const visibleMessages = messages.filter((msg) => {
+      const hiddenFor = msg.hiddenFor || [];
+      return !hiddenFor.includes(args.userId);
+    });
+
     const enriched = await Promise.all(
-      messages.map(async (msg) => {
+      visibleMessages.map(async (msg) => {
         const sender = await ctx.db.get(msg.senderId);
         const reactions = await ctx.db
           .query("reactions")
@@ -117,17 +128,18 @@ export const getMessages = query({
           .collect();
 
         const reactionGroups = reactions.reduce((acc, reaction) => {
-          if (!acc[reaction.emoji]) {
-            acc[reaction.emoji] = [];
+          const key = `reaction_${reaction.emoji.codePointAt(0)}`;
+          if (!acc[key]) {
+            acc[key] = { emoji: reaction.emoji, userIds: [] };
           }
-          acc[reaction.emoji].push(reaction.userId as string);
+          acc[key].userIds.push(reaction.userId as string);
           return acc;
-        }, {} as Record<string, string[]>);
+        }, {} as Record<string, { emoji: string; userIds: string[] }>);
 
         return {
           ...msg,
           sender,
-          reactions: reactionGroups,
+          reactions: Object.values(reactionGroups),
         };
       })
     );
@@ -187,5 +199,14 @@ export const getMessageReactions = query({
     }, {} as Record<string, { emoji: string; count: number; users: string[] }>);
 
     return Object.values(grouped);
+  },
+});
+
+// Find conversation including hidden ones
+export const getAllConversations = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const conversations = await ctx.db.query("conversations").collect();
+    return conversations.filter((conv) => conv.participants.includes(args.userId));
   },
 });
