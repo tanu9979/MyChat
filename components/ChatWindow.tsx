@@ -177,19 +177,23 @@ export function ChatWindow({
 
                   {reactionEntries.length > 0 && (
                     <div className="flex gap-1 mt-1">
-                      {reactionEntries.map(([emoji, userIds]) => (
-                        <button
-                          key={emoji}
-                          onClick={() => toggleReaction({ messageId: msg._id, userId: currentUserId, emoji })}
-                          className={`text-xs px-2 py-1 rounded-full border ${
-                            userIds.includes(currentUserId)
-                              ? "bg-blue-100 border-blue-300"
-                              : "bg-gray-100 border-gray-300"
-                          }`}
-                        >
-                          {emoji} {userIds.length}
-                        </button>
-                      ))}
+                      {reactionEntries.map(([emoji, userIds]) => {
+                        const userIdStrings = userIds as string[];
+                        const hasReacted = userIdStrings.some(id => id === currentUserId);
+                        return (
+                          <button
+                            key={emoji}
+                            onClick={() => toggleReaction({ messageId: msg._id, userId: currentUserId, emoji })}
+                            className={`text-xs px-2 py-1 rounded-full border ${
+                              hasReacted
+                                ? "bg-blue-100 border-blue-300"
+                                : "bg-gray-100 border-gray-300"
+                            }`}
+                          >
+                            {emoji} {userIds.length}
+                          </button>
+                        );
+                      })}
                     </div>
                   )}
 
