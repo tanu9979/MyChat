@@ -292,7 +292,6 @@ This project is open source and available under the [MIT License](LICENSE).
 - Built with [Next.js](https://nextjs.org/)
 - Real-time backend by [Convex](https://convex.dev/)
 - Authentication by [Clerk](https://clerk.com/)
-- Developed with assistance from **Amazon Q Developer**
 
 ---
 
