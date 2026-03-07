@@ -36,7 +36,7 @@ export function ChatWindow({
       email: string;
       imageUrl?: string;
       isOnline: boolean;
-    }>;
+    } | null>;
   };
   onBack?: () => void;
 }) {
@@ -212,13 +212,7 @@ export function ChatWindow({
               </button>
             </div>
             <div className="space-y-3 max-h-96 overflow-y-auto">
-              {conversation.allParticipants?.map((participant: {
-                _id: string;
-                name: string;
-                email: string;
-                imageUrl?: string;
-                isOnline: boolean;
-              }) => (
+              {conversation.allParticipants?.filter(p => p !== null).map((participant) => (
                 <div key={participant._id} className="flex items-center gap-3 p-3 bg-gray-700 rounded-lg">
                   {participant.imageUrl ? (
                     <img src={participant.imageUrl} alt={participant.name} className="w-10 h-10 rounded-full" />
