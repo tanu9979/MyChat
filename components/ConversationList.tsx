@@ -1,9 +1,9 @@
 "use client";
 
-import { useQuery, useMutation } from "convex/react";
+import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 
 function formatTimestamp(timestamp: number) {
   const date = new Date(timestamp);
@@ -32,20 +32,7 @@ export function ConversationList({
   onSelectConversation: (id: Id<"conversations">) => void;
 }) {
   const conversations = useQuery(api.queries.getUserConversations, { userId: currentUserId });
-  const hideConversation = useMutation(api.mutations.hideConversation);
-  const [menuOpen, setMenuOpen] = useState<Id<"conversations"> | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setMenuOpen(null);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   return (
     <div className="flex-1 overflow-y-auto bg-gray-800 flex flex-col">
@@ -87,30 +74,30 @@ export function ConversationList({
             const isOnline = conv.isGroup ? false : conv.otherUser?.isOnline;
 
             return (
-              <div key={conv._id} className="relative" ref={menuOpen === conv._id ? menuRef : null}>
-                <button
-                  onClick={() => onSelectConversation(conv._id)}
-                  className={`w-full p-4 hover:bg-gray-700 flex items-center gap-3 transition ${
-                    isSelected ? "bg-gray-700" : ""
-                  }`}
-                >
-                  <div className="relative flex-shrink-0">
-                    {displayImage ? (
-                      <img
-                        src={displayImage}
-                        alt={displayName}
-                        className="w-12 h-12 rounded-full"
-                      />
-                    ) : (
-                      <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold">
-                        {displayName.charAt(0).toUpperCase()}
-                      </div>
-                    )}
-                    {isOnline && (
-                      <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0 text-left pr-10">
+              <button
+                key={conv._id}
+                onClick={() => onSelectConversation(conv._id)}
+                className={`w-full p-4 hover:bg-gray-700 flex items-center gap-3 transition ${
+                  isSelected ? "bg-gray-700" : ""
+                }`}
+              >
+                <div className="relative flex-shrink-0">
+                  {displayImage ? (
+                    <img
+                      src={displayImage}
+                      alt={displayName}
+                      className="w-12 h-12 rounded-full"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold">
+                      {displayName.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  {isOnline && (
+                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0 text-left">
                     <div className="flex items-center justify-between gap-2">
                       <div className="font-semibold truncate flex-1 text-white">{displayName}</div>
                       {conv.lastMessage && (
@@ -134,38 +121,7 @@ export function ConversationList({
                       )}
                     </div>
                   </div>
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setMenuOpen(menuOpen === conv._id ? null : conv._id);
-                  }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center hover:bg-gray-600 rounded-full text-gray-400 hover:text-gray-200 transition-colors z-10"
-                >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 16 16">
-                    <circle cx="8" cy="2" r="1.5"/>
-                    <circle cx="8" cy="8" r="1.5"/>
-                    <circle cx="8" cy="14" r="1.5"/>
-                  </svg>
-                </button>
-                {menuOpen === conv._id && (
-                  <div className="absolute right-4 top-16 bg-white border-2 border-gray-300 rounded-lg shadow-xl z-20 min-w-[150px]">
-                    <button
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        await hideConversation({ conversationId: conv._id, userId: currentUserId });
-                        setMenuOpen(null);
-                        if (selectedConversationId === conv._id) {
-                          onSelectConversation(null as any);
-                        }
-                      }}
-                      className="w-full px-4 py-3 text-left text-red-600 hover:bg-red-50 rounded-lg font-medium"
-                    >
-                      Delete Chat
-                    </button>
-                  </div>
-                )}
-              </div>
+              </button>
             );
           })}
         </div>

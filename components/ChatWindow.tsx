@@ -26,6 +26,7 @@ export function ChatWindow({
   const [editingMessageId, setEditingMessageId] = useState<Id<"messages"> | null>(null);
   const [editContent, setEditContent] = useState("");
   const [showGroupMembers, setShowGroupMembers] = useState(false);
+  const [showUserProfile, setShowUserProfile] = useState(false);
   const [reactionTooltip, setReactionTooltip] = useState<{messageId: Id<"messages">, emoji: string} | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -156,6 +157,14 @@ export function ChatWindow({
                 {conversation.otherUser.isOnline ? "Online" : "Offline"}
               </p>
             </div>
+            <button
+              onClick={() => setShowUserProfile(!showUserProfile)}
+              className="p-2 hover:bg-gray-700 rounded-lg text-gray-300 hover:text-white"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </button>
           </>
         ) : null}
       </div>
@@ -191,6 +200,48 @@ export function ChatWindow({
                   )}
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* User Profile Modal */}
+      {showUserProfile && conversation?.otherUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center" onClick={() => setShowUserProfile(false)}>
+          <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-semibold text-white">Profile Info</h3>
+              <button onClick={() => setShowUserProfile(false)} className="text-gray-400 hover:text-white">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="flex flex-col items-center">
+              {conversation.otherUser.imageUrl ? (
+                <img src={conversation.otherUser.imageUrl} alt={conversation.otherUser.name} className="w-24 h-24 rounded-full mb-4" />
+              ) : (
+                <div className="w-24 h-24 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold text-3xl mb-4">
+                  {conversation.otherUser.name[0]}
+                </div>
+              )}
+              <div className="w-full space-y-3">
+                <div className="bg-gray-700 rounded-lg p-4">
+                  <div className="text-sm text-gray-400 mb-1">Name</div>
+                  <div className="text-white font-semibold">{conversation.otherUser.name}</div>
+                </div>
+                <div className="bg-gray-700 rounded-lg p-4">
+                  <div className="text-sm text-gray-400 mb-1">Email</div>
+                  <div className="text-white">{conversation.otherUser.email}</div>
+                </div>
+                <div className="bg-gray-700 rounded-lg p-4">
+                  <div className="text-sm text-gray-400 mb-1">Status</div>
+                  <div className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-full ${conversation.otherUser.isOnline ? 'bg-green-500' : 'bg-gray-500'}`}></div>
+                    <div className="text-white">{conversation.otherUser.isOnline ? 'Online' : 'Offline'}</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
