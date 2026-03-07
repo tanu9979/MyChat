@@ -6,8 +6,13 @@ import { Id } from "@/convex/_generated/dataModel";
 import { useState, useEffect, useRef } from "react";
 import { UserButton } from "@clerk/nextjs";
 
+// Fixed set of reaction emojis available for messages
 const REACTIONS = ["👍", "❤️", "😂", "😮", "😢"];
 
+/**
+ * ChatWindow component - Main messaging interface
+ * Features: Real-time messages, typing indicators, reactions, edit/delete, auto-scroll
+ */
 export function ChatWindow({
   conversationId,
   currentUserId,
@@ -32,12 +37,14 @@ export function ChatWindow({
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
 
+  // Real-time queries - automatically update when data changes
   const messages = useQuery(api.queries.getMessages, { conversationId, userId: currentUserId });
   const typingUsers = useQuery(api.queries.getTypingUsers, {
     conversationId,
     excludeUserId: currentUserId,
   });
 
+  // Mutations for database operations
   const sendMessage = useMutation(api.mutations.sendMessage);
   const setTyping = useMutation(api.mutations.setTyping);
   const markConversationAsRead = useMutation(api.mutations.markConversationAsRead);
@@ -46,12 +53,14 @@ export function ChatWindow({
   const editMessage = useMutation(api.mutations.editMessage);
   const toggleReaction = useMutation(api.mutations.toggleReaction);
 
+  // Mark conversation as read when messages are loaded
   useEffect(() => {
     if (messages && messages.length > 0) {
       markConversationAsRead({ conversationId, userId: currentUserId });
     }
   }, [conversationId, currentUserId, messages, markConversationAsRead]);
 
+  // Smart scroll button - show when user scrolls up from bottom
   useEffect(() => {
     const container = messagesContainerRef.current;
     if (!container) return;
@@ -66,6 +75,7 @@ export function ChatWindow({
     return () => container.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Auto-scroll to bottom when new messages arrive (if already at bottom)
   useEffect(() => {
     if (!showScrollButton) {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -93,11 +103,12 @@ export function ChatWindow({
       clearTimeout(typingTimeoutRef.current);
     }
 
+    // Set typing indicator with 2-second auto-clear timeout
     if (value.trim()) {
       setTyping({ conversationId, userId: currentUserId, isTyping: true });
       typingTimeoutRef.current = setTimeout(() => {
         setTyping({ conversationId, userId: currentUserId, isTyping: false });
-      }, 2000);
+      }, 2000); // Auto-clear after 2 seconds of inactivity
     } else {
       setTyping({ conversationId, userId: currentUserId, isTyping: false });
     }

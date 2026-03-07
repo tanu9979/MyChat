@@ -6,6 +6,10 @@ import { useUser } from "@clerk/nextjs";
 import { useState } from "react";
 import { Id } from "@/convex/_generated/dataModel";
 
+/**
+ * UserList component - Displays all users for starting new conversations
+ * Features: Real-time user search, online status indicators
+ */
 export function UserList({
   currentUserId,
   onSelectUser,
@@ -16,6 +20,7 @@ export function UserList({
   const { user } = useUser();
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Real-time query - automatically updates when users change
   const users = useQuery(
     api.queries.searchUsers,
     user?.id ? { query: searchQuery, excludeClerkId: user.id } : "skip"

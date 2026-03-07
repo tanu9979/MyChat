@@ -6,6 +6,10 @@ import { Id } from "@/convex/_generated/dataModel";
 import { useState } from "react";
 import { useUser } from "@clerk/nextjs";
 
+/**
+ * CreateGroup component - Multi-select interface for creating group chats
+ * Features: User search, checkbox selection, group name input at bottom
+ */
 export function CreateGroup({
   currentUserId,
   onCreateGroup,
@@ -18,15 +22,18 @@ export function CreateGroup({
   const [groupName, setGroupName] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Get all users except current user
   const allUsers = useQuery(
     api.queries.getAllUsers,
     user?.id ? { excludeClerkId: user.id } : "skip"
   );
 
+  // Filter users based on search query
   const filteredUsers = allUsers?.filter((user) =>
     user.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Toggle user selection (add/remove from group)
   const toggleUser = (userId: Id<"users">) => {
     setSelectedUsers((prev) =>
       prev.includes(userId)

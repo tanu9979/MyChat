@@ -5,6 +5,13 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useState } from "react";
 
+/**
+ * Smart timestamp formatter for conversation list
+ * - Today: Shows time only (e.g., "2:30 PM")
+ * - This week: Shows day name (e.g., "Mon")
+ * - This year: Shows month and day (e.g., "Jan 15")
+ * - Older: Shows full date (e.g., "Jan 15, 2023")
+ */
 function formatTimestamp(timestamp: number) {
   const date = new Date(timestamp);
   const now = new Date();
@@ -22,6 +29,10 @@ function formatTimestamp(timestamp: number) {
   }
 }
 
+/**
+ * ConversationList component - Displays all user conversations
+ * Features: Real-time updates, search filter, unread badges, online status
+ */
 export function ConversationList({
   currentUserId,
   selectedConversationId,
@@ -31,6 +42,7 @@ export function ConversationList({
   selectedConversationId: Id<"conversations"> | null;
   onSelectConversation: (id: Id<"conversations">) => void;
 }) {
+  // Real-time query - automatically updates when conversations change
   const conversations = useQuery(api.queries.getUserConversations, { userId: currentUserId });
   const [searchQuery, setSearchQuery] = useState("");
 

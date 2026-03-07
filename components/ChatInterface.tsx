@@ -11,6 +11,11 @@ import { ChatWindow } from "./ChatWindow";
 import { UserButton } from "@clerk/nextjs";
 import { CreateGroup } from "./CreateGroup";
 
+/**
+ * ChatInterface component - Main application layout
+ * Manages: Navigation, user sync, online status, responsive design
+ * Layout: Left sidebar (64px) + Conversation list (320px) + Chat window
+ */
 export function ChatInterface() {
   const { user } = useUser();
   const [selectedConversationId, setSelectedConversationId] = useState<Id<"conversations"> | null>(null);
@@ -18,6 +23,7 @@ export function ChatInterface() {
   const [isMobile, setIsMobile] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // Mutations for user and conversation management
   const syncUser = useMutation(api.mutations.syncUser);
   const setUserOnline = useMutation(api.mutations.setUserOnline);
   const setUserOffline = useMutation(api.mutations.setUserOffline);
@@ -25,6 +31,8 @@ export function ChatInterface() {
   const createConversation = useMutation(api.mutations.createConversation);
   const createGroupConversation = useMutation(api.mutations.createGroupConversation);
   const unhideConversation = useMutation(api.mutations.unhideConversation);
+  
+  // Real-time queries
   const currentUser = useQuery(
     api.queries.getCurrentUser,
     user?.id ? { clerkId: user.id } : "skip"
@@ -38,6 +46,7 @@ export function ChatInterface() {
     currentUser ? { userId: currentUser._id } : "skip"
   );
 
+  // Sync Clerk user data to Convex database on first load
   useEffect(() => {
     if (user && !currentUser) {
       syncUser({
@@ -49,6 +58,7 @@ export function ChatInterface() {
     }
   }, [user, currentUser, syncUser]);
 
+  // Detect mobile viewport (breakpoint: 768px)
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
@@ -56,7 +66,11 @@ export function ChatInterface() {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Update online status
+  // Online status management with heartbeat
+  // - Sets user online on mount
+  // - Heartbeat every 30 seconds to maintain online status
+  // - Cleanup check every 15 seconds to mark inactive users offline
+  // - Sets user offline on unmount/page close
   useEffect(() => {
     if (!user?.id) return;
 
