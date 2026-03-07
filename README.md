@@ -7,6 +7,26 @@
 [![Convex](https://img.shields.io/badge/Convex-Real--time-orange)](https://convex.dev/)
 [![Clerk](https://img.shields.io/badge/Clerk-Auth-purple)](https://clerk.com/)
 
+## 🚀 Live Demo
+
+**URL:** [https://my-chat-sepia-beta.vercel.app/](https://my-chat-sepia-beta.vercel.app/)
+
+### Test Accounts
+
+You can create your own account or use these test credentials:
+
+**User 1:**
+- Email: `alice@test.com`
+- Password: `TestUser123!`
+
+**User 2:**
+- Email: `bob@test.com`
+- Password: `TestUser123!`
+
+*Note: These accounts have pre-populated conversations and group chats for demonstration purposes.*
+
+---
+
 ## Overview
 
 MyChat is a feature-rich, real-time messaging application that delivers seamless communication experiences. Built with modern web technologies, it provides instant message delivery, typing indicators, message reactions, and group chat capabilities—all wrapped in a sleek, responsive dark-themed interface.
