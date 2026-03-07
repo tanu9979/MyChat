@@ -214,3 +214,43 @@ export const getAllConversations = query({
     return conversations.filter((conv) => conv.participants.includes(args.userId));
   },
 });
+
+// Scheduled Messages
+export const getScheduledMessages = query({
+  args: { 
+    conversationId: v.id("conversations"),
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const scheduledMessages = await ctx.db
+      .query("scheduledMessages")
+      .withIndex("by_conversation", (q) => q.eq("conversationId", args.conversationId))
+      .filter((q) => q.and(
+        q.eq(q.field("senderId"), args.userId),
+        q.eq(q.field("isSent"), false)
+      ))
+      .collect();
+
+    return scheduledMessages.sort((a, b) => a.scheduledFor - b.scheduledFor);
+  },
+});
+
+export const getUserScheduledMessages = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const scheduledMessages = await ctx.db
+      .query("scheduledMessages")
+      .withIndex("by_sender", (q) => q.eq("senderId", args.userId))
+      .filter((q) => q.eq(q.field("isSent"), false))
+      .collect();
+
+    const enriched = await Promise.all(
+      scheduledMessages.map(async (msg) => {
+        const conversation = await ctx.db.get(msg.conversationId);
+        return { ...msg, conversation };
+      })
+    );
+
+    return enriched.sort((a, b) => a.scheduledFor - b.scheduledFor);
+  },
+});

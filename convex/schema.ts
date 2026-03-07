@@ -65,4 +65,18 @@ export default defineSchema({
   })
     .index("by_message", ["messageId"]) // Get all reactions for a message
     .index("by_user_and_message", ["userId", "messageId"]), // Toggle reactions
+
+  // Scheduled messages
+  scheduledMessages: defineTable({
+    conversationId: v.id("conversations"),
+    senderId: v.id("users"),
+    content: v.string(),
+    scheduledFor: v.number(), // Timestamp when to send
+    createdAt: v.number(),
+    isSent: v.boolean(),
+    sentAt: v.optional(v.number()),
+  })
+    .index("by_scheduled_time", ["scheduledFor"]) // Process messages by time
+    .index("by_sender", ["senderId"]) // User's scheduled messages
+    .index("by_conversation", ["conversationId"]), // Conversation's scheduled messages
 });

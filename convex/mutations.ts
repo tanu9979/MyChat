@@ -421,3 +421,78 @@ export const editMessage = mutation({
     }
   },
 });
+
+// Schedule message
+export const scheduleMessage = mutation({
+  args: {
+    conversationId: v.id("conversations"),
+    senderId: v.id("users"),
+    content: v.string(),
+    scheduledFor: v.number(),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.insert("scheduledMessages", {
+      conversationId: args.conversationId,
+      senderId: args.senderId,
+      content: args.content,
+      scheduledFor: args.scheduledFor,
+      createdAt: Date.now(),
+      isSent: false,
+    });
+  },
+});
+
+// Process scheduled messages (called by cron job)
+export const processScheduledMessages = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const now = Date.now();
+    const pendingMessages = await ctx.db
+      .query("scheduledMessages")
+      .withIndex("by_scheduled_time")
+      .filter((q) => q.and(
+        q.lte(q.field("scheduledFor"), now),
+        q.eq(q.field("isSent"), false)
+      ))
+      .collect();
+
+    for (const scheduledMsg of pendingMessages) {
+      // Send the message
+      await ctx.db.insert("messages", {
+        conversationId: scheduledMsg.conversationId,
+        senderId: scheduledMsg.senderId,
+        content: scheduledMsg.content,
+        timestamp: now,
+        readBy: [scheduledMsg.senderId],
+        isDeleted: false,
+      });
+
+      // Update conversation timestamp
+      await ctx.db.patch(scheduledMsg.conversationId, {
+        lastMessageTime: now,
+      });
+
+      // Mark as sent
+      await ctx.db.patch(scheduledMsg._id, {
+        isSent: true,
+        sentAt: now,
+      });
+    }
+
+    return { processed: pendingMessages.length };
+  },
+});
+
+// Cancel scheduled message
+export const cancelScheduledMessage = mutation({
+  args: {
+    messageId: v.id("scheduledMessages"),
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const scheduledMsg = await ctx.db.get(args.messageId);
+    if (scheduledMsg && scheduledMsg.senderId === args.userId && !scheduledMsg.isSent) {
+      await ctx.db.delete(args.messageId);
+    }
+  },
+});

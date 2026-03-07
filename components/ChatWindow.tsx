@@ -49,12 +49,19 @@ export function ChatWindow({
   const [showGroupMembers, setShowGroupMembers] = useState(false);
   const [showUserProfile, setShowUserProfile] = useState(false);
   const [reactionTooltip, setReactionTooltip] = useState<{messageId: Id<"messages">, emoji: string} | null>(null);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [showScheduleCalendar, setShowScheduleCalendar] = useState(false);
+  const [showScheduleForm, setShowScheduleForm] = useState(false);
+  const [scheduleDate, setScheduleDate] = useState("");
+  const [scheduleTime, setScheduleTime] = useState("");
+  const [messageToSchedule, setMessageToSchedule] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   // Real-time queries - automatically update when data changes
   const messages = useQuery(api.queries.getMessages, { conversationId, userId: currentUserId });
+  const scheduledMessages = useQuery(api.queries.getScheduledMessages, { conversationId, userId: currentUserId });
   const typingUsers = useQuery(api.queries.getTypingUsers, {
     conversationId,
     excludeUserId: currentUserId,
@@ -62,6 +69,8 @@ export function ChatWindow({
 
   // Mutations for database operations
   const sendMessage = useMutation(api.mutations.sendMessage);
+  const scheduleMessage = useMutation(api.mutations.scheduleMessage);
+  const cancelScheduledMessage = useMutation(api.mutations.cancelScheduledMessage);
   const setTyping = useMutation(api.mutations.setTyping);
   const markConversationAsRead = useMutation(api.mutations.markConversationAsRead);
   const deleteMessage = useMutation(api.mutations.deleteMessage);
@@ -133,6 +142,40 @@ export function ChatWindow({
     }
   };
 
+  const handleScheduleMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!messageToSchedule.trim() || !scheduleDate || !scheduleTime) return;
+
+    const scheduledFor = new Date(`${scheduleDate}T${scheduleTime}`).getTime();
+    if (scheduledFor <= Date.now()) {
+      alert("Please select a future date and time");
+      return;
+    }
+
+    await scheduleMessage({
+      conversationId,
+      senderId: currentUserId,
+      content: messageToSchedule.trim(),
+      scheduledFor,
+    });
+
+    setMessageToSchedule("");
+    setScheduleDate("");
+    setScheduleTime("");
+    setShowScheduleForm(false); // Go back to list view
+  };
+
+  const openScheduleModal = () => {
+    setMessageToSchedule(message);
+    setShowScheduleModal(true);
+    
+    // Set default to 1 hour from now
+    const now = new Date();
+    now.setHours(now.getHours() + 1);
+    setScheduleDate(now.toISOString().split('T')[0]);
+    setScheduleTime(now.toTimeString().slice(0, 5));
+  };
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     setShowScrollButton(false);
@@ -159,6 +202,15 @@ export function ChatWindow({
               <h2 className="text-lg font-semibold text-white">{conversation.groupName || "Group Chat"}</h2>
               <p className="text-xs text-gray-400">{conversation.participants?.length || 0} members</p>
             </div>
+            <button
+              onClick={() => setShowScheduleCalendar(!showScheduleCalendar)}
+              className="p-2 hover:bg-gray-700 rounded-lg text-gray-300 hover:text-white"
+              title="Scheduled Messages"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </button>
             <button
               onClick={() => setShowGroupMembers(!showGroupMembers)}
               className="p-2 hover:bg-gray-700 rounded-lg text-gray-300 hover:text-white"
@@ -187,6 +239,15 @@ export function ChatWindow({
                 {conversation.otherUser.isOnline ? "Online" : "Offline"}
               </p>
             </div>
+            <button
+              onClick={() => setShowScheduleCalendar(!showScheduleCalendar)}
+              className="p-2 hover:bg-gray-700 rounded-lg text-gray-300 hover:text-white"
+              title="Scheduled Messages"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </button>
             <button
               onClick={() => setShowUserProfile(!showUserProfile)}
               className="p-2 hover:bg-gray-700 rounded-lg text-gray-300 hover:text-white"
@@ -278,6 +339,36 @@ export function ChatWindow({
       )}
 
       <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-900">
+        {/* Scheduled Messages */}
+        {scheduledMessages && scheduledMessages.length > 0 && (
+          <div className="bg-blue-900/20 border border-blue-700/30 rounded-lg p-3 mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-sm font-medium text-blue-400">Scheduled Messages</span>
+            </div>
+            {scheduledMessages.map((scheduledMsg) => (
+              <div key={scheduledMsg._id} className="flex items-center justify-between bg-blue-900/30 rounded p-2 mb-2 last:mb-0">
+                <div className="flex-1">
+                  <div className="text-sm text-gray-200 truncate">{scheduledMsg.content}</div>
+                  <div className="text-xs text-blue-300">
+                    {new Date(scheduledMsg.scheduledFor).toLocaleString()}
+                  </div>
+                </div>
+                <button
+                  onClick={() => cancelScheduledMessage({ messageId: scheduledMsg._id, userId: currentUserId })}
+                  className="text-red-400 hover:text-red-300 p-1"
+                  title="Cancel scheduled message"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
         {!messages ? (
           <div className="text-center text-gray-400">Loading messages...</div>
         ) : messages.length === 0 ? (
@@ -567,6 +658,238 @@ export function ChatWindow({
           </button>
         </div>
       </form>
+
+      {/* Schedule Message Modal */}
+      {showScheduleModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center" onClick={() => setShowScheduleModal(false)}>
+          <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-semibold text-white">Schedule Message</h3>
+              <button onClick={() => setShowScheduleModal(false)} className="text-gray-400 hover:text-white">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <form onSubmit={handleScheduleMessage} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Message</label>
+                <textarea
+                  value={messageToSchedule}
+                  onChange={(e) => setMessageToSchedule(e.target.value)}
+                  placeholder="Type your message..."
+                  className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400"
+                  rows={3}
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Date</label>
+                  <input
+                    type="date"
+                    value={scheduleDate}
+                    onChange={(e) => setScheduleDate(e.target.value)}
+                    className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Time</label>
+                  <input
+                    type="time"
+                    value={scheduleTime}
+                    onChange={(e) => setScheduleTime(e.target.value)}
+                    className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowScheduleModal(false)}
+                  className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Schedule
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Schedule Calendar Modal */}
+      {showScheduleCalendar && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center" onClick={() => setShowScheduleCalendar(false)}>
+          <div className="bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-semibold text-white flex items-center gap-2">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Scheduled Messages
+              </h3>
+              {!showScheduleForm && (
+                <button onClick={() => setShowScheduleCalendar(false)} className="text-gray-400 hover:text-white">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
+            {showScheduleForm ? (
+              <form onSubmit={handleScheduleMessage} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Message</label>
+                  <textarea
+                    value={messageToSchedule}
+                    onChange={(e) => setMessageToSchedule(e.target.value)}
+                    placeholder="Type your message..."
+                    className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400"
+                    rows={3}
+                    required
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Date</label>
+                    <input
+                      type="date"
+                      value={scheduleDate}
+                      onChange={(e) => setScheduleDate(e.target.value)}
+                      className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Time</label>
+                    <input
+                      type="time"
+                      value={scheduleTime}
+                      onChange={(e) => setScheduleTime(e.target.value)}
+                      className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowScheduleForm(false)}
+                    className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  >
+                    Schedule
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <>
+                <div className="mb-6">
+                  <button
+                    onClick={() => {
+                      setMessageToSchedule("");
+                      setShowScheduleForm(true);
+                      const now = new Date();
+                      now.setHours(now.getHours() + 1);
+                      setScheduleDate(now.toISOString().split('T')[0]);
+                      setScheduleTime(now.toTimeString().slice(0, 5));
+                    }}
+                    className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-1 text-sm"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    New
+                  </button>
+                </div>
+            
+            {scheduledMessages && scheduledMessages.length > 0 ? (
+              <div className="space-y-3">
+                {scheduledMessages.map((scheduledMsg) => {
+                  const scheduleDate = new Date(scheduledMsg.scheduledFor);
+                  const isToday = scheduleDate.toDateString() === new Date().toDateString();
+                  const isPast = scheduledMsg.scheduledFor < Date.now();
+                  
+                  return (
+                    <div key={scheduledMsg._id} className={`p-4 rounded-lg border ${
+                      isPast ? 'bg-red-900/20 border-red-700/30' : 'bg-gray-700 border-gray-600'
+                    }`}>
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="text-white mb-2">{scheduledMsg.content}</div>
+                          <div className="flex items-center gap-4 text-sm">
+                            <div className={`flex items-center gap-1 ${
+                              isPast ? 'text-red-400' : isToday ? 'text-yellow-400' : 'text-blue-400'
+                            }`}>
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              {scheduleDate.toLocaleDateString()} at {scheduleDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                            </div>
+                            {isPast && (
+                              <span className="text-red-400 text-xs">Overdue</span>
+                            )}
+                            {isToday && !isPast && (
+                              <span className="text-yellow-400 text-xs">Today</span>
+                            )}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => cancelScheduledMessage({ messageId: scheduledMsg._id, userId: currentUserId })}
+                          className="text-red-400 hover:text-red-300 p-2 hover:bg-red-900/20 rounded"
+                          title="Cancel scheduled message"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <svg className="w-16 h-16 text-gray-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <p className="text-gray-400 mb-4">No scheduled messages</p>
+                <button
+                  onClick={() => {
+                    setMessageToSchedule("");
+                    setShowScheduleForm(true);
+                    const now = new Date();
+                    now.setHours(now.getHours() + 1);
+                    setScheduleDate(now.toISOString().split('T')[0]);
+                    setScheduleTime(now.toTimeString().slice(0, 5));
+                  }}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 mx-auto"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Schedule Your First Message
+                </button>
+              </div>
+            )}
+            </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
