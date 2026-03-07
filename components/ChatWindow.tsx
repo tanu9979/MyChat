@@ -26,6 +26,7 @@ export function ChatWindow({
   const [editingMessageId, setEditingMessageId] = useState<Id<"messages"> | null>(null);
   const [editContent, setEditContent] = useState("");
   const [showGroupMembers, setShowGroupMembers] = useState(false);
+  const [reactionTooltip, setReactionTooltip] = useState<{messageId: Id<"messages">, emoji: string} | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
@@ -281,31 +282,20 @@ export function ChatWindow({
 
                         {menuOpen === msg._id && isOwn && (
                           <div className="absolute right-0 top-12 bg-white border-2 border-gray-300 rounded-lg shadow-xl z-20 min-w-[140px]">
-                            <button
-                              onClick={() => {
-                                setMenuOpen(null);
-                              }}
-                              className="w-full px-4 py-2 text-left hover:bg-gray-100 border-b flex items-center gap-2 text-gray-700"
-                            >
-                              <span className="text-lg">😊</span>
-                              React
-                            </button>
-                            {menuOpen === msg._id && (
-                              <div className="px-2 py-2 flex gap-1 border-b">
-                                {REACTIONS.map((emoji) => (
-                                  <button
-                                    key={emoji}
-                                    onClick={() => {
-                                      toggleReaction({ messageId: msg._id, userId: currentUserId, emoji });
-                                      setMenuOpen(null);
-                                    }}
-                                    className="hover:bg-gray-100 p-1 rounded text-lg"
-                                  >
-                                    {emoji}
-                                  </button>
-                                ))}
-                              </div>
-                            )}
+                            <div className="px-2 py-2 flex gap-1 border-b">
+                              {REACTIONS.map((emoji) => (
+                                <button
+                                  key={emoji}
+                                  onClick={() => {
+                                    toggleReaction({ messageId: msg._id, userId: currentUserId, emoji });
+                                    setMenuOpen(null);
+                                  }}
+                                  className="hover:bg-gray-100 p-1 rounded text-lg"
+                                >
+                                  {emoji}
+                                </button>
+                              ))}
+                            </div>
                             <button
                               onClick={() => {
                                 setEditContent(msg.content);
@@ -336,18 +326,20 @@ export function ChatWindow({
                         
                         {menuOpen === msg._id && !isOwn && (
                           <div className="absolute left-0 top-12 bg-white border-2 border-gray-300 rounded-lg shadow-xl z-20 min-w-[140px]">
-                            <button
-                              onClick={async () => {
-                                await hideMessage({ messageId: msg._id, userId: currentUserId });
-                                setMenuOpen(null);
-                              }}
-                              className="w-full px-4 py-2 text-left text-red-600 hover:bg-red-50 rounded-lg flex items-center gap-2"
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                              Delete for me
-                            </button>
+                            <div className="px-2 py-2 flex gap-1">
+                              {REACTIONS.map((emoji) => (
+                                <button
+                                  key={emoji}
+                                  onClick={() => {
+                                    toggleReaction({ messageId: msg._id, userId: currentUserId, emoji });
+                                    setMenuOpen(null);
+                                  }}
+                                  className="hover:bg-gray-100 p-1 rounded text-lg"
+                                >
+                                  {emoji}
+                                </button>
+                              ))}
+                            </div>
                           </div>
                         )}
                       </>
@@ -357,20 +349,54 @@ export function ChatWindow({
 
 
                   {reactions.length > 0 && (
-                    <div className="flex gap-1 mt-1">
-                      {reactions.map((reaction) => (
-                        <button
-                          key={reaction.emoji}
-                          onClick={() => toggleReaction({ messageId: msg._id, userId: currentUserId, emoji: reaction.emoji })}
-                          className={`text-xs px-2 py-1 rounded-full border ${
-                            reaction.userIds.includes(currentUserId as string)
-                              ? "bg-blue-100 border-blue-300"
-                              : "bg-gray-100 border-gray-300"
-                          }`}
-                        >
-                          {reaction.emoji} {reaction.userIds.length}
-                        </button>
-                      ))}
+                    <div className="flex gap-1 mt-1 flex-wrap">
+                      {reactions.map((reaction, index) => {
+                        const reactedUsers = messages
+                          ?.flatMap(m => m.reactions || [])
+                          .filter(r => r.emoji === reaction.emoji)
+                          .flatMap(r => r.userIds)
+                          .map(userId => {
+                            const user = messages?.find(m => m.sender?._id === userId)?.sender;
+                            return user?.name || 'Unknown';
+                          })
+                          .filter((name, index, self) => self.indexOf(name) === index);
+                        
+                        const isFirstReaction = index === 0;
+                        const isLastReaction = index === reactions.length - 1;
+                        
+                        return (
+                          <div key={reaction.emoji} className="relative">
+                            <button
+                              onClick={() => toggleReaction({ messageId: msg._id, userId: currentUserId, emoji: reaction.emoji })}
+                              onMouseEnter={() => setReactionTooltip({messageId: msg._id, emoji: reaction.emoji})}
+                              onMouseLeave={() => setReactionTooltip(null)}
+                              className={`text-sm px-2 py-1 rounded-full border ${
+                                reaction.userIds.includes(currentUserId as string)
+                                  ? "bg-blue-100 border-blue-300 text-blue-800"
+                                  : "bg-gray-700 border-gray-600 text-gray-200"
+                              }`}
+                            >
+                              {reaction.emoji} {reaction.userIds.length}
+                            </button>
+                            {reactionTooltip?.messageId === msg._id && reactionTooltip?.emoji === reaction.emoji && (
+                              <div className={`absolute bottom-full mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg whitespace-nowrap z-30 max-w-xs ${
+                                isOwn 
+                                  ? (isLastReaction ? 'right-0' : isFirstReaction ? 'left-0' : 'left-1/2 -translate-x-1/2')
+                                  : (isFirstReaction ? 'left-0' : isLastReaction ? 'right-0' : 'left-1/2 -translate-x-1/2')
+                              }`}>
+                                <div className="max-w-[200px] overflow-hidden text-ellipsis">
+                                  {reactedUsers?.join(', ')}
+                                </div>
+                                <div className={`absolute top-full -mt-1 border-4 border-transparent border-t-gray-900 ${
+                                  isOwn
+                                    ? (isLastReaction ? 'right-2' : isFirstReaction ? 'left-2' : 'left-1/2 -translate-x-1/2')
+                                    : (isFirstReaction ? 'left-2' : isLastReaction ? 'right-2' : 'left-1/2 -translate-x-1/2')
+                                }`}></div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
 
@@ -427,10 +453,10 @@ export function ChatWindow({
       )}
 
       {showScrollButton && (
-        <div className="px-4 pb-2">
+        <div className="px-4 pb-2 flex justify-center">
           <button
             onClick={scrollToBottom}
-            className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+            className="px-4 py-1.5 bg-blue-600 text-white rounded-full hover:bg-blue-700 text-xs font-medium shadow-lg"
           >
             ↓ New messages
           </button>

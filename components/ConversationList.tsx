@@ -34,6 +34,7 @@ export function ConversationList({
   const conversations = useQuery(api.queries.getUserConversations, { userId: currentUserId });
   const hideConversation = useMutation(api.mutations.hideConversation);
   const [menuOpen, setMenuOpen] = useState<Id<"conversations"> | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -47,7 +48,17 @@ export function ConversationList({
   }, []);
 
   return (
-    <div className="flex-1 overflow-y-auto bg-gray-800">
+    <div className="flex-1 overflow-y-auto bg-gray-800 flex flex-col">
+      <div className="p-4 border-b border-gray-700">
+        <input
+          type="text"
+          placeholder="Search conversations..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400"
+        />
+      </div>
+      <div className="flex-1 overflow-y-auto">
       {!conversations ? (
         <div className="p-4 text-center text-gray-400">Loading conversations...</div>
       ) : conversations.length === 0 ? (
@@ -60,7 +71,14 @@ export function ConversationList({
         </div>
       ) : (
         <div className="divide-y divide-gray-700">
-          {conversations.map((conv) => {
+          {conversations
+            .filter((conv) => {
+              const displayName = conv.isGroup
+                ? conv.groupName || "Group Chat"
+                : conv.otherUser?.name || "Unknown User";
+              return displayName.toLowerCase().includes(searchQuery.toLowerCase());
+            })
+            .map((conv) => {
             const isSelected = conv._id === selectedConversationId;
             const displayName = conv.isGroup
               ? conv.groupName || "Group Chat"
@@ -152,6 +170,7 @@ export function ConversationList({
           })}
         </div>
       )}
+      </div>
     </div>
   );
 }
