@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation } from "./_generated/server";
+import { mutation, internalMutation } from "./_generated/server";
 
 // User Management
 export const syncUser = mutation({
@@ -439,6 +439,47 @@ export const scheduleMessage = mutation({
       createdAt: Date.now(),
       isSent: false,
     });
+  },
+});
+
+// Process scheduled messages (called by cron job)
+export const processScheduledMessages = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const now = Date.now();
+    const pendingMessages = await ctx.db
+      .query("scheduledMessages")
+      .withIndex("by_scheduled_time")
+      .filter((q) => q.and(
+        q.lte(q.field("scheduledFor"), now),
+        q.eq(q.field("isSent"), false)
+      ))
+      .collect();
+
+    for (const scheduledMsg of pendingMessages) {
+      // Send the message
+      await ctx.db.insert("messages", {
+        conversationId: scheduledMsg.conversationId,
+        senderId: scheduledMsg.senderId,
+        content: scheduledMsg.content,
+        timestamp: now,
+        readBy: [scheduledMsg.senderId],
+        isDeleted: false,
+      });
+
+      // Update conversation timestamp
+      await ctx.db.patch(scheduledMsg.conversationId, {
+        lastMessageTime: now,
+      });
+
+      // Mark as sent
+      await ctx.db.patch(scheduledMsg._id, {
+        isSent: true,
+        sentAt: now,
+      });
+    }
+
+    return { processed: pendingMessages.length };
   },
 });
 
