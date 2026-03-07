@@ -4,7 +4,6 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useState, useEffect, useRef } from "react";
-import { UserButton } from "@clerk/nextjs";
 
 // Fixed set of reaction emojis available for messages
 const REACTIONS = ["👍", "❤️", "😂", "😮", "😢"];
@@ -21,7 +20,24 @@ export function ChatWindow({
 }: {
   conversationId: Id<"conversations">;
   currentUserId: Id<"users">;
-  conversation?: any;
+  conversation?: {
+    isGroup?: boolean;
+    groupName?: string;
+    participants?: string[];
+    otherUser?: {
+      name: string;
+      imageUrl?: string;
+      isOnline: boolean;
+      email: string;
+    };
+    allParticipants?: Array<{
+      _id: string;
+      name: string;
+      email: string;
+      imageUrl?: string;
+      isOnline: boolean;
+    }>;
+  };
   onBack?: () => void;
 }) {
   const [message, setMessage] = useState("");
@@ -35,7 +51,7 @@ export function ChatWindow({
   const [reactionTooltip, setReactionTooltip] = useState<{messageId: Id<"messages">, emoji: string} | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout>();
+  const typingTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   // Real-time queries - automatically update when data changes
   const messages = useQuery(api.queries.getMessages, { conversationId, userId: currentUserId });
@@ -49,7 +65,6 @@ export function ChatWindow({
   const setTyping = useMutation(api.mutations.setTyping);
   const markConversationAsRead = useMutation(api.mutations.markConversationAsRead);
   const deleteMessage = useMutation(api.mutations.deleteMessage);
-  const hideMessage = useMutation(api.mutations.hideMessage);
   const editMessage = useMutation(api.mutations.editMessage);
   const toggleReaction = useMutation(api.mutations.toggleReaction);
 
@@ -197,7 +212,13 @@ export function ChatWindow({
               </button>
             </div>
             <div className="space-y-3 max-h-96 overflow-y-auto">
-              {conversation.allParticipants?.map((participant: any) => (
+              {conversation.allParticipants?.map((participant: {
+                _id: string;
+                name: string;
+                email: string;
+                imageUrl?: string;
+                isOnline: boolean;
+              }) => (
                 <div key={participant._id} className="flex items-center gap-3 p-3 bg-gray-700 rounded-lg">
                   {participant.imageUrl ? (
                     <img src={participant.imageUrl} alt={participant.name} className="w-10 h-10 rounded-full" />

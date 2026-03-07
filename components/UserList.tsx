@@ -11,7 +11,6 @@ import { Id } from "@/convex/_generated/dataModel";
  * Features: Real-time user search, online status indicators
  */
 export function UserList({
-  currentUserId,
   onSelectUser,
 }: {
   currentUserId: Id<"users">;
