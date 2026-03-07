@@ -318,10 +318,42 @@ export function ChatWindow({
                   )}
 
                   <div className="text-xs text-gray-500 mt-1">
-                    {new Date(msg.timestamp).toLocaleTimeString("en-US", {
-                      hour: "numeric",
-                      minute: "2-digit",
-                    })}
+                    {(() => {
+                      const msgDate = new Date(msg.timestamp);
+                      const today = new Date();
+                      const isToday = msgDate.toDateString() === today.toDateString();
+                      const isSameYear = msgDate.getFullYear() === today.getFullYear();
+                      
+                      console.log('Message:', msg.content.substring(0, 20), 'Year:', msgDate.getFullYear(), 'Today Year:', today.getFullYear(), 'Same Year:', isSameYear);
+
+                      if (isToday) {
+                        return msgDate.toLocaleTimeString("en-US", {
+                          hour: "numeric",
+                          minute: "2-digit",
+                        });
+                      } else if (isSameYear) {
+                        const time = msgDate.toLocaleTimeString("en-US", {
+                          hour: "numeric",
+                          minute: "2-digit",
+                        });
+                        const date = msgDate.toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                        });
+                        return `${date}, ${time}`;
+                      } else {
+                        const time = msgDate.toLocaleTimeString("en-US", {
+                          hour: "numeric",
+                          minute: "2-digit",
+                        });
+                        const date = msgDate.toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        });
+                        return `${date} ${time}`;
+                      }
+                    })()}
                   </div>
                 </div>
               </div>

@@ -54,6 +54,23 @@ export const setUserOnline = mutation({
   },
 });
 
+export const updateUserActivity = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const users = await ctx.db.query("users").collect();
+    const now = Date.now();
+    const timeout = 60000; // 1 minute
+
+    for (const user of users) {
+      if (user.isOnline && now - user.lastSeen > timeout) {
+        await ctx.db.patch(user._id, {
+          isOnline: false,
+        });
+      }
+    }
+  },
+});
+
 export const setUserOffline = mutation({
   args: { clerkId: v.string() },
   handler: async (ctx, args) => {
