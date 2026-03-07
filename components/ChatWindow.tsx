@@ -29,7 +29,7 @@ export function ChatWindow({
       imageUrl?: string;
       isOnline: boolean;
       email: string;
-    };
+    } | null;
     allParticipants?: Array<{
       _id: string;
       name: string;
