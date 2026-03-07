@@ -413,15 +413,15 @@ export function ChatWindow({
                   {reactions.length > 0 && (
                     <div className="flex gap-1 mt-1 flex-wrap">
                       {reactions.map((reaction, index) => {
-                        const reactedUsers = messages
-                          ?.flatMap(m => m.reactions || [])
-                          .filter(r => r.emoji === reaction.emoji)
-                          .flatMap(r => r.userIds)
+                        // Get unique user names for this specific reaction on this message
+                        const reactedUsers = reaction.userIds
                           .map(userId => {
-                            const user = messages?.find(m => m.sender?._id === userId)?.sender;
+                            // Find user from all messages' senders
+                            const allSenders = messages?.map(m => m.sender).filter(Boolean) || [];
+                            const user = allSenders.find(s => s?._id === userId);
                             return user?.name || 'Unknown';
                           })
-                          .filter((name, index, self) => self.indexOf(name) === index);
+                          .filter((name, idx, self) => self.indexOf(name) === idx); // Remove duplicates
                         
                         const isFirstReaction = index === 0;
                         const isLastReaction = index === reactions.length - 1;
