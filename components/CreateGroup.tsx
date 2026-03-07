@@ -45,27 +45,20 @@ export function CreateGroup({
   };
 
   return (
-    <div className="flex-1 flex flex-col">
-      <div className="p-4 border-b">
-        <input
-          type="text"
-          value={groupName}
-          onChange={(e) => setGroupName(e.target.value)}
-          placeholder="Group name"
-          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
-        />
+    <div className="flex-1 flex flex-col bg-gray-800">
+      <div className="p-4 border-b border-gray-700">
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search users..."
-          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400"
         />
       </div>
 
       {selectedUsers.length > 0 && (
-        <div className="p-4 border-b bg-blue-50">
-          <p className="text-sm text-gray-600 mb-2">
+        <div className="p-4 border-b border-gray-700 bg-gray-750">
+          <p className="text-sm text-gray-300 mb-2">
             Selected: {selectedUsers.length} user{selectedUsers.length !== 1 ? "s" : ""}
           </p>
           <div className="flex flex-wrap gap-2">
@@ -92,16 +85,16 @@ export function CreateGroup({
 
       <div className="flex-1 overflow-y-auto">
         {!filteredUsers ? (
-          <div className="p-4 text-center text-gray-500">Loading users...</div>
+          <div className="p-4 text-center text-gray-400">Loading users...</div>
         ) : filteredUsers.length === 0 ? (
-          <div className="p-4 text-center text-gray-500">No users found</div>
+          <div className="p-4 text-center text-gray-400">No users found</div>
         ) : (
-          <div className="divide-y">
+          <div className="divide-y divide-gray-700">
             {filteredUsers.map((user) => (
               <button
                 key={user._id}
                 onClick={() => toggleUser(user._id)}
-                className="w-full p-4 hover:bg-gray-50 flex items-center gap-3 transition"
+                className="w-full p-4 hover:bg-gray-700 flex items-center gap-3 transition"
               >
                 <input
                   type="checkbox"
@@ -121,8 +114,8 @@ export function CreateGroup({
                   </div>
                 )}
                 <div className="flex-1 text-left">
-                  <div className="font-semibold">{user.name}</div>
-                  <div className="text-sm text-gray-500">{user.email}</div>
+                  <div className="font-semibold text-white">{user.name}</div>
+                  <div className="text-sm text-gray-400">{user.email}</div>
                 </div>
               </button>
             ))}
@@ -130,7 +123,14 @@ export function CreateGroup({
         )}
       </div>
 
-      <div className="p-4 border-t">
+      <div className="p-4 border-t border-gray-700">
+        <input
+          type="text"
+          value={groupName}
+          onChange={(e) => setGroupName(e.target.value)}
+          placeholder="Group name"
+          className="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 mb-3"
+        />
         <button
           onClick={handleCreate}
           disabled={!groupName.trim()}

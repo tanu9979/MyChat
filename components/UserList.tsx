@@ -22,30 +22,30 @@ export function UserList({
   );
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
-      <div className="p-4 border-b">
+    <div className="flex-1 flex flex-col overflow-hidden bg-gray-800">
+      <div className="p-4 border-b border-gray-700">
         <input
           type="text"
           placeholder="Search users..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400"
         />
       </div>
       <div className="flex-1 overflow-y-auto">
         {!users ? (
-          <div className="p-4 text-center text-gray-500">Loading users...</div>
+          <div className="p-4 text-center text-gray-400">Loading users...</div>
         ) : users.length === 0 ? (
-          <div className="p-4 text-center text-gray-500">
+          <div className="p-4 text-center text-gray-400">
             {searchQuery ? "No users found" : "No other users yet"}
           </div>
         ) : (
-          <div className="divide-y">
+          <div className="divide-y divide-gray-700">
             {users.map((user) => (
               <button
                 key={user._id}
                 onClick={() => onSelectUser(user._id)}
-                className="w-full p-4 hover:bg-gray-50 flex items-center gap-3 transition"
+                className="w-full p-4 hover:bg-gray-700 flex items-center gap-3 transition"
               >
                 <div className="relative">
                   {user.imageUrl ? (
@@ -64,8 +64,8 @@ export function UserList({
                   )}
                 </div>
                 <div className="flex-1 text-left">
-                  <div className="font-semibold">{user.name}</div>
-                  <div className="text-sm text-gray-500">
+                  <div className="font-semibold text-white">{user.name}</div>
+                  <div className="text-sm text-gray-400">
                     {user.isOnline ? "Online" : "Offline"}
                   </div>
                 </div>

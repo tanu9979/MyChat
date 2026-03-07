@@ -74,11 +74,15 @@ export const getUserConversations = query({
         ).length;
 
         if (conv.isGroup) {
+          const allParticipants = await Promise.all(
+            conv.participants.map(async (id) => await ctx.db.get(id))
+          );
           return {
             ...conv,
             lastMessage,
             unreadCount,
             otherUser: null,
+            allParticipants,
           };
         }
 

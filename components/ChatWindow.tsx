@@ -25,6 +25,7 @@ export function ChatWindow({
   const [menuOpen, setMenuOpen] = useState<Id<"messages"> | null>(null);
   const [editingMessageId, setEditingMessageId] = useState<Id<"messages"> | null>(null);
   const [editContent, setEditContent] = useState("");
+  const [showGroupMembers, setShowGroupMembers] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
@@ -106,16 +107,36 @@ export function ChatWindow({
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-white">
-      <div className="p-4 border-b flex items-center gap-3">
+    <div className="flex-1 flex flex-col bg-gray-850 relative">
+      <div className="p-4 border-b border-gray-700 bg-gray-800 flex items-center gap-3">
         {onBack && (
-          <button onClick={onBack} className="text-gray-600 hover:text-gray-900">
+          <button onClick={onBack} className="text-gray-300 hover:text-white">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
         )}
-        {conversation?.otherUser && (
+        {conversation?.isGroup ? (
+          <>
+            <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h2 className="text-lg font-semibold text-white">{conversation.groupName || "Group Chat"}</h2>
+              <p className="text-xs text-gray-400">{conversation.participants?.length || 0} members</p>
+            </div>
+            <button
+              onClick={() => setShowGroupMembers(!showGroupMembers)}
+              className="p-2 hover:bg-gray-700 rounded-lg text-gray-300 hover:text-white"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </button>
+          </>
+        ) : conversation?.otherUser ? (
           <>
             {conversation.otherUser.imageUrl ? (
               <img
@@ -129,20 +150,56 @@ export function ChatWindow({
               </div>
             )}
             <div className="flex-1">
-              <h2 className="text-lg font-semibold">{conversation.otherUser.name}</h2>
-              <p className="text-xs text-gray-500">
+              <h2 className="text-lg font-semibold text-white">{conversation.otherUser.name}</h2>
+              <p className="text-xs text-gray-400">
                 {conversation.otherUser.isOnline ? "Online" : "Offline"}
               </p>
             </div>
           </>
-        )}
+        ) : null}
       </div>
 
-      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
+      {/* Group Members Modal */}
+      {showGroupMembers && conversation?.isGroup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center" onClick={() => setShowGroupMembers(false)}>
+          <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-semibold text-white">Group Members</h3>
+              <button onClick={() => setShowGroupMembers(false)} className="text-gray-400 hover:text-white">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="space-y-3 max-h-96 overflow-y-auto">
+              {conversation.allParticipants?.map((participant: any) => (
+                <div key={participant._id} className="flex items-center gap-3 p-3 bg-gray-700 rounded-lg">
+                  {participant.imageUrl ? (
+                    <img src={participant.imageUrl} alt={participant.name} className="w-10 h-10 rounded-full" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
+                      {participant.name[0]}
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <div className="font-semibold text-white">{participant.name}</div>
+                    <div className="text-sm text-gray-400">{participant.email}</div>
+                  </div>
+                  {participant.isOnline && (
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-900">
         {!messages ? (
-          <div className="text-center text-gray-500">Loading messages...</div>
+          <div className="text-center text-gray-400">Loading messages...</div>
         ) : messages.length === 0 ? (
-          <div className="text-center text-gray-500 mt-8">
+          <div className="text-center text-gray-400 mt-8">
             <p>No messages yet</p>
             <p className="text-sm mt-2">Send a message to start the conversation</p>
           </div>
@@ -161,7 +218,7 @@ export function ChatWindow({
                 <div className={`max-w-xs lg:max-w-md ${isOwn ? "items-end" : "items-start"} flex flex-col relative`}>
                   <div className="flex items-center gap-2 mb-1">
                     {!isOwn && msg.sender && (
-                      <span className="text-xs text-gray-600 font-medium">{msg.sender.name}</span>
+                      <span className="text-xs text-gray-400 font-medium">{msg.sender.name}</span>
                     )}
                   </div>
                   <div className="relative group">
@@ -194,10 +251,10 @@ export function ChatWindow({
                       <>
                         <div className="relative">
                           <div
-                            className={`px-4 py-2 rounded-lg ${
+                            className={`px-4 py-2 rounded-2xl ${
                               isOwn
                                 ? "bg-blue-600 text-white"
-                                : "bg-gray-100 text-gray-900"
+                                : "bg-gray-800 text-gray-100"
                             } ${msg.isDeleted ? "italic" : ""}`}
                           >
                             {msg.isDeleted ? "This message was deleted" : msg.content}
@@ -317,7 +374,7 @@ export function ChatWindow({
                     </div>
                   )}
 
-                  <div className="text-xs text-gray-500 mt-1">
+                  <div className="text-xs text-gray-400 mt-1">
                     {(() => {
                       const msgDate = new Date(msg.timestamp);
                       const today = new Date();
@@ -364,7 +421,7 @@ export function ChatWindow({
       </div>
 
       {typingUsers && typingUsers.length > 0 && (
-        <div className="px-4 py-2 text-sm text-gray-500">
+        <div className="px-4 py-2 text-sm text-gray-400 bg-gray-900">
           {typingUsers.map((u) => u?.name).join(", ")} {typingUsers.length === 1 ? "is" : "are"} typing...
         </div>
       )}
@@ -380,21 +437,23 @@ export function ChatWindow({
         </div>
       )}
 
-      <form onSubmit={handleSendMessage} className="p-4 border-t">
+      <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-700 bg-gray-800">
         <div className="flex gap-2">
           <input
             type="text"
             value={message}
             onChange={(e) => handleTyping(e.target.value)}
             placeholder="Type a message..."
-            className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 px-4 py-3 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400"
           />
           <button
             type="submit"
             disabled={!message.trim()}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed"
           >
-            Send
+            <svg className="w-6 h-6 rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            </svg>
           </button>
         </div>
       </form>

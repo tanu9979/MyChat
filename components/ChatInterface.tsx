@@ -100,7 +100,7 @@ export function ChatInterface() {
   const showSidebar = !isMobile || !selectedConversationId;
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gray-900">
       {/* Left Sidebar - Desktop: Always visible, Mobile: Overlay */}
       <div className={`${
         isMobile 
@@ -156,6 +156,7 @@ export function ChatInterface() {
           </svg>
           {isMobile && <span className="font-medium">Create Group</span>}
         </button>
+        <div className="flex-1"></div>
         <button
           onClick={() => { setView("profile"); setSelectedConversationId(null); if(isMobile) setSidebarOpen(false); }}
           className={`${isMobile ? "w-full px-4 py-3 justify-start" : "w-12 h-12 mx-auto"} rounded-lg flex items-center ${isMobile ? "gap-3" : "justify-center"} transition ${
@@ -177,12 +178,12 @@ export function ChatInterface() {
 
       {/* Main Content Area */}
       {showSidebar && (
-        <div className={`${isMobile ? "w-full" : "w-80"} bg-white border-r flex flex-col`}>
-          <div className="p-4 border-b flex items-center gap-3">
+        <div className={`${isMobile ? "w-full" : "w-80"} bg-gray-800 border-r border-gray-700 flex flex-col`}>
+          <div className="p-4 border-b border-gray-700 flex items-center gap-3">
             {isMobile && (
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="p-2 hover:bg-gray-100 rounded-lg"
+                className="p-2 hover:bg-gray-700 rounded-lg text-gray-300"
                 title="Menu"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -190,7 +191,7 @@ export function ChatInterface() {
                 </svg>
               </button>
             )}
-            <h1 className="text-xl font-bold flex-1">
+            <h1 className="text-xl font-bold flex-1 text-white">
               {view === "conversations" && "Conversations"}
               {view === "newchat" && "New Chat"}
               {view === "creategroup" && "Create Group"}
@@ -243,32 +244,59 @@ export function ChatInterface() {
           )}
           {view === "profile" && (
             <div className="flex-1 flex items-center justify-center p-8">
-              <div className="text-center">
-                <div className="mb-6 flex justify-center">
+              <div className="w-full max-w-md">
+                <div className="mb-8 flex justify-center">
                   {currentUser.imageUrl ? (
                     <img
                       src={currentUser.imageUrl}
                       alt={currentUser.name}
-                      className="w-24 h-24 rounded-full"
+                      className="w-32 h-32 rounded-full border-4 border-blue-600"
                     />
                   ) : (
-                    <div className="w-24 h-24 rounded-full bg-blue-600 flex items-center justify-center text-white text-3xl font-semibold">
+                    <div className="w-32 h-32 rounded-full bg-blue-600 flex items-center justify-center text-white text-5xl font-semibold border-4 border-blue-500">
                       {currentUser.name[0]}
                     </div>
                   )}
                 </div>
-                <h2 className="text-xl font-semibold mb-2">{currentUser.name}</h2>
-                <p className="text-gray-600 mb-6">{currentUser.email}</p>
-                <div className="flex justify-center">
-                  <UserButton
-                    appearance={{
-                      elements: {
-                        avatarBox: "w-12 h-12",
-                      },
-                    }}
-                  />
+                <div className="text-center mb-8">
+                  <h2 className="text-2xl font-bold mb-2 text-white">{currentUser.name}</h2>
+                  <p className="text-gray-400 text-lg">{currentUser.email}</p>
                 </div>
-                <p className="text-sm text-gray-500 mt-4">Click to manage your account</p>
+                <div className="space-y-3">
+                  <div className="bg-gray-700 rounded-lg p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-white font-semibold">Account Settings</p>
+                        <p className="text-gray-400 text-sm">Manage your account</p>
+                      </div>
+                    </div>
+                    <UserButton
+                      appearance={{
+                        elements: {
+                          avatarBox: "w-10 h-10",
+                        },
+                      }}
+                    />
+                  </div>
+                  <div className="bg-gray-700 rounded-lg p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-white font-semibold">Status</p>
+                        <p className="text-green-400 text-sm">Online</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -283,7 +311,7 @@ export function ChatInterface() {
         />
       ) : (
         !isMobile && (
-          <div className="flex-1 flex items-center justify-center text-gray-500">
+          <div className="flex-1 flex items-center justify-center text-gray-400 bg-gray-850">
             {view === "conversations" ? (
               <div className="text-center">
                 <svg className="w-24 h-24 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
