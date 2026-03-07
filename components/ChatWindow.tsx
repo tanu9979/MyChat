@@ -99,17 +99,21 @@ export function ChatWindow({
   const handleTyping = (value: string) => {
     setMessage(value);
 
+    // Clear existing timeout
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
 
-    // Set typing indicator with 2-second auto-clear timeout
     if (value.trim()) {
+      // Set typing indicator - this updates lastUpdated timestamp
       setTyping({ conversationId, userId: currentUserId, isTyping: true });
+      
+      // Auto-clear after 2 seconds of no typing
       typingTimeoutRef.current = setTimeout(() => {
         setTyping({ conversationId, userId: currentUserId, isTyping: false });
-      }, 2000); // Auto-clear after 2 seconds of inactivity
+      }, 2000);
     } else {
+      // Clear immediately when input is empty
       setTyping({ conversationId, userId: currentUserId, isTyping: false });
     }
   };
@@ -508,9 +512,12 @@ export function ChatWindow({
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Typing Indicator - Always visible at bottom of messages */}
       {typingUsers && typingUsers.length > 0 && (
-        <div className="px-4 py-2 text-sm text-gray-400 bg-gray-900">
-          {typingUsers.map((u) => u?.name).join(", ")} {typingUsers.length === 1 ? "is" : "are"} typing...
+        <div className="px-4 py-2 text-sm text-gray-400 bg-gray-800 border-t border-gray-700">
+          <span className="italic">
+            {typingUsers.map((u) => u?.name).join(", ")} {typingUsers.length === 1 ? "is" : "are"} typing...
+          </span>
         </div>
       )}
 
