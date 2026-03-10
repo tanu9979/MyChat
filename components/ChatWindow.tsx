@@ -236,7 +236,13 @@ export function ChatWindow({
             <div className="flex-1">
               <h2 className="text-lg font-semibold text-white">{conversation.otherUser.name}</h2>
               <p className="text-xs text-gray-400">
-                {conversation.otherUser.isOnline ? "Online" : "Offline"}
+                {typingUsers && typingUsers.length > 0 ? (
+                  <span className="italic text-blue-400">typing...</span>
+                ) : conversation.otherUser.isOnline ? (
+                  "Online"
+                ) : (
+                  "Offline"
+                )}
               </p>
             </div>
             <button
