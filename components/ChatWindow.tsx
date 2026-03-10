@@ -262,7 +262,7 @@ export function ChatWindow({
 
       {/* Group Members Modal */}
       {showGroupMembers && conversation?.isGroup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center" onClick={() => setShowGroupMembers(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={() => setShowGroupMembers(false)}>
           <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-semibold text-white">Group Members</h3>
@@ -298,7 +298,7 @@ export function ChatWindow({
 
       {/* User Profile Modal */}
       {showUserProfile && conversation?.otherUser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center" onClick={() => setShowUserProfile(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={() => setShowUserProfile(false)}>
           <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-semibold text-white">Profile Info</h3>
@@ -628,12 +628,15 @@ export function ChatWindow({
       )}
 
       {showScrollButton && (
-        <div className="px-4 pb-2 flex justify-center">
+        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-10">
           <button
             onClick={scrollToBottom}
-            className="px-4 py-1.5 bg-blue-600 text-white rounded-full hover:bg-blue-700 text-xs font-medium shadow-lg"
+            className="px-3 py-1.5 bg-blue-600 text-white rounded-full hover:bg-blue-700 text-xs font-medium shadow-lg flex items-center gap-1.5"
           >
-            ↓ New messages
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+            New messages
           </button>
         </div>
       )}
@@ -661,7 +664,7 @@ export function ChatWindow({
 
       {/* Schedule Message Modal */}
       {showScheduleModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center" onClick={() => setShowScheduleModal(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={() => setShowScheduleModal(false)}>
           <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-semibold text-white">Schedule Message</h3>
@@ -727,7 +730,7 @@ export function ChatWindow({
 
       {/* Schedule Calendar Modal */}
       {showScheduleCalendar && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center" onClick={() => setShowScheduleCalendar(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={() => setShowScheduleCalendar(false)}>
           <div className="bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-semibold text-white flex items-center gap-2">
