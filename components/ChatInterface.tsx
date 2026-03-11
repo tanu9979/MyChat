@@ -10,6 +10,7 @@ import { ConversationList } from "./ConversationList";
 import { ChatWindow } from "./ChatWindow";
 import { UserButton } from "@clerk/nextjs";
 import { CreateGroup } from "./CreateGroup";
+import { ThemeToggle } from "./ThemeToggle";
 
 /**
  * ChatInterface component - Main application layout
@@ -114,19 +115,19 @@ export function ChatInterface() {
   const showSidebar = !isMobile || !selectedConversationId;
 
   return (
-    <div className="flex h-screen bg-gray-900">
+    <div className="flex h-screen bg-background text-foreground transition-colors duration-300">
       {/* Left Sidebar - Desktop: Always visible, Mobile: Overlay */}
       <div className={`${
         isMobile 
           ? sidebarOpen ? "fixed left-0 top-0 bottom-0 w-64 z-40" : "hidden"
           : "w-16"
-      } bg-gray-900 flex flex-col py-4 gap-4`}>
+      } bg-background border-r border-gray-border flex flex-col py-4 gap-4 transition-colors duration-300`}>
         {isMobile && (
           <div className="flex items-center justify-between px-4 mb-2">
             <h2 className="text-white font-semibold text-lg">Menu</h2>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-800"
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -137,7 +138,7 @@ export function ChatInterface() {
         <button
           onClick={() => { setView("conversations"); setSelectedConversationId(null); if(isMobile) setSidebarOpen(false); }}
           className={`${isMobile ? "w-full px-4 py-3 justify-start" : "w-12 h-12 mx-auto"} rounded-lg flex items-center ${isMobile ? "gap-3" : "justify-center"} transition ${
-            view === "conversations" ? "bg-blue-600 text-white" : isMobile ? "text-gray-400 hover:bg-gray-800" : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+            view === "conversations" ? "bg-brand-purple text-white shadow-lg shadow-brand-purple/20" : isMobile ? "text-muted-foreground hover:bg-muted" : "bg-gray-card text-muted-foreground hover:bg-gray-border"
           }`}
           title="Conversations"
         >
@@ -149,7 +150,7 @@ export function ChatInterface() {
         <button
           onClick={() => { setView("newchat"); setSelectedConversationId(null); if(isMobile) setSidebarOpen(false); }}
           className={`${isMobile ? "w-full px-4 py-3 justify-start" : "w-12 h-12 mx-auto"} rounded-lg flex items-center ${isMobile ? "gap-3" : "justify-center"} transition ${
-            view === "newchat" ? "bg-blue-600 text-white" : isMobile ? "text-gray-400 hover:bg-gray-800" : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+            view === "newchat" ? "bg-brand-blue text-white shadow-lg shadow-brand-blue/20" : isMobile ? "text-muted-foreground hover:bg-muted" : "bg-gray-card text-muted-foreground hover:bg-gray-border"
           }`}
           title="New Chat"
         >
@@ -161,7 +162,7 @@ export function ChatInterface() {
         <button
           onClick={() => { setView("creategroup"); setSelectedConversationId(null); if(isMobile) setSidebarOpen(false); }}
           className={`${isMobile ? "w-full px-4 py-3 justify-start" : "w-12 h-12 mx-auto"} rounded-lg flex items-center ${isMobile ? "gap-3" : "justify-center"} transition ${
-            view === "creategroup" ? "bg-blue-600 text-white" : isMobile ? "text-gray-400 hover:bg-gray-800" : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+            view === "creategroup" ? "bg-brand-blue text-white shadow-lg shadow-brand-blue/20" : isMobile ? "text-muted-foreground hover:bg-muted" : "bg-gray-card text-muted-foreground hover:bg-gray-border"
           }`}
           title="Create Group"
         >
@@ -174,7 +175,7 @@ export function ChatInterface() {
         <button
           onClick={() => { setView("profile"); setSelectedConversationId(null); if(isMobile) setSidebarOpen(false); }}
           className={`${isMobile ? "w-full px-4 py-3 justify-start" : "w-12 h-12 mx-auto"} rounded-lg flex items-center ${isMobile ? "gap-3" : "justify-center"} transition ${
-            view === "profile" ? "bg-blue-600 text-white" : isMobile ? "text-gray-400 hover:bg-gray-800" : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+            view === "profile" ? "bg-brand-purple text-white shadow-lg shadow-brand-purple/20" : isMobile ? "text-muted-foreground hover:bg-muted" : "bg-gray-card text-muted-foreground hover:bg-gray-border"
           }`}
           title="Profile"
         >
@@ -183,6 +184,15 @@ export function ChatInterface() {
           </svg>
           {isMobile && <span className="font-medium">Profile</span>}
         </button>
+        <div className="flex flex-col items-center gap-4 mt-auto">
+          {!isMobile && <ThemeToggle />}
+          {isMobile && (
+            <div className="px-4 py-3 w-full border-t border-gray-border flex items-center justify-between">
+              <span className="font-medium text-muted-foreground">Appearance</span>
+              <ThemeToggle />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Backdrop for mobile sidebar */}
@@ -192,8 +202,8 @@ export function ChatInterface() {
 
       {/* Main Content Area */}
       {showSidebar && (
-        <div className={`${isMobile ? "w-full" : "w-80"} bg-gray-800 border-r border-gray-700 flex flex-col`}>
-          <div className="p-4 border-b border-gray-700 flex items-center gap-3">
+        <div className={`${isMobile ? "w-full" : "w-80"} bg-gray-card border-r border-gray-border flex flex-col transition-colors duration-300`}>
+          <div className="p-4 border-b border-gray-border flex items-center gap-3">
             {isMobile && (
               <button
                 onClick={() => setSidebarOpen(true)}
@@ -205,7 +215,7 @@ export function ChatInterface() {
                 </svg>
               </button>
             )}
-            <h1 className="text-xl font-bold flex-1 text-white">
+            <h1 className="text-xl font-bold flex-1 text-foreground transition-colors">
               {view === "conversations" && "Conversations"}
               {view === "newchat" && "New Chat"}
               {view === "creategroup" && "Create Group"}
@@ -264,29 +274,29 @@ export function ChatInterface() {
                     <img
                       src={currentUser.imageUrl}
                       alt={currentUser.name}
-                      className="w-32 h-32 rounded-full border-4 border-blue-600"
+                      className="w-32 h-32 rounded-full border-4 border-brand-purple"
                     />
                   ) : (
-                    <div className="w-32 h-32 rounded-full bg-blue-600 flex items-center justify-center text-white text-5xl font-semibold border-4 border-blue-500">
+                    <div className="w-32 h-32 rounded-full bg-gradient-to-br from-brand-blue to-brand-purple flex items-center justify-center text-white text-5xl font-semibold border-4 border-[#1a1a1a]">
                       {currentUser.name[0]}
                     </div>
                   )}
                 </div>
                 <div className="text-center mb-8">
-                  <h2 className="text-2xl font-bold mb-2 text-white">{currentUser.name}</h2>
-                  <p className="text-gray-400 text-lg">{currentUser.email}</p>
+                  <h2 className="text-2xl font-bold mb-2 text-foreground">{currentUser.name}</h2>
+                  <p className="text-muted-foreground text-lg">{currentUser.email}</p>
                 </div>
                 <div className="space-y-3">
-                  <div className="bg-gray-700 rounded-lg p-4 flex items-center justify-between">
+                  <div className="bg-muted/50 rounded-lg p-4 flex items-center justify-between border border-border">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                      <div className="w-10 h-10 bg-brand-blue rounded-lg flex items-center justify-center">
                         <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                       </div>
                       <div>
-                        <p className="text-white font-semibold">Account Settings</p>
-                        <p className="text-gray-400 text-sm">Manage your account</p>
+                        <p className="text-foreground font-semibold">Account Settings</p>
+                        <p className="text-muted-foreground text-sm">Manage your account</p>
                       </div>
                     </div>
                     <UserButton
@@ -297,16 +307,16 @@ export function ChatInterface() {
                       }}
                     />
                   </div>
-                  <div className="bg-gray-700 rounded-lg p-4">
+                  <div className="bg-muted/50 rounded-lg p-4 border border-border">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
-                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="w-10 h-10 bg-green-500/10 rounded-lg flex items-center justify-center">
+                        <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                       </div>
                       <div>
-                        <p className="text-white font-semibold">Status</p>
-                        <p className="text-green-400 text-sm">Online</p>
+                        <p className="text-foreground font-semibold">Status</p>
+                        <p className="text-green-500 text-sm">Online</p>
                       </div>
                     </div>
                   </div>
@@ -325,7 +335,7 @@ export function ChatInterface() {
         />
       ) : (
         !isMobile && (
-          <div className="flex-1 flex items-center justify-center text-gray-400 bg-gray-850">
+          <div className="flex-1 flex items-center justify-center text-muted-foreground bg-background transition-colors">
             {view === "conversations" ? (
               <div className="text-center">
                 <svg className="w-24 h-24 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">

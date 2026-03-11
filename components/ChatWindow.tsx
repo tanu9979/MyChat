@@ -288,10 +288,10 @@ export function ChatWindow({
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-gray-850 relative">
-      <div className="p-4 border-b border-gray-700 bg-gray-800 flex items-center gap-3">
+    <div className="flex-1 flex flex-col bg-background relative transition-colors">
+      <div className="p-4 border-b border-gray-border bg-gray-card/50 backdrop-blur-sm flex items-center gap-3">
         {onBack && (
-          <button onClick={onBack} className="text-gray-300 hover:text-white">
+          <button onClick={onBack} className="text-muted-foreground hover:text-foreground">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
@@ -299,18 +299,18 @@ export function ChatWindow({
         )}
         {conversation?.isGroup ? (
           <>
-            <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-blue to-brand-purple flex items-center justify-center text-white font-semibold shadow-lg shadow-brand-blue/20">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
             </div>
             <div className="flex-1">
-              <h2 className="text-lg font-semibold text-white">{conversation.groupName || "Group Chat"}</h2>
-              <p className="text-xs text-gray-400">{conversation.participants?.length || 0} members</p>
+              <h2 className="text-lg font-semibold text-foreground">{conversation.groupName || "Group Chat"}</h2>
+              <p className="text-xs text-muted-foreground">{conversation.participants?.length || 0} members</p>
             </div>
             <button
               onClick={() => setShowScheduleCalendar(!showScheduleCalendar)}
-              className="p-2 hover:bg-gray-700 rounded-lg text-gray-300 hover:text-white"
+              className="p-2 hover:bg-accent rounded-full text-muted-foreground hover:text-foreground transition-colors border border-transparent hover:border-border shadow-sm hover:shadow-md"
               title="Scheduled Messages"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -319,7 +319,8 @@ export function ChatWindow({
             </button>
             <button
               onClick={() => setShowGroupMembers(!showGroupMembers)}
-              className="p-2 hover:bg-gray-700 rounded-lg text-gray-300 hover:text-white"
+              className="p-2 hover:bg-accent rounded-full text-muted-foreground hover:text-foreground transition-colors border border-transparent hover:border-border shadow-sm hover:shadow-md"
+              title="View Info"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -335,13 +336,13 @@ export function ChatWindow({
                 className="w-10 h-10 rounded-full"
               />
             ) : (
-              <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-blue to-brand-purple flex items-center justify-center text-white font-semibold shadow-lg shadow-brand-blue/20">
                 {conversation.otherUser.name[0]}
               </div>
             )}
             <div className="flex-1">
-              <h2 className="text-lg font-semibold text-white">{conversation.otherUser.name}</h2>
-              <p className="text-xs text-gray-400">
+              <h2 className="text-lg font-semibold text-foreground">{conversation.otherUser.name}</h2>
+              <p className="text-xs text-muted-foreground">
                 {typingUsers && typingUsers.length > 0 ? (
                   <span className="italic text-blue-400">typing...</span>
                 ) : conversation.otherUser.isOnline ? (
@@ -353,7 +354,7 @@ export function ChatWindow({
             </div>
             <button
               onClick={() => setShowScheduleCalendar(!showScheduleCalendar)}
-              className="p-2 hover:bg-gray-700 rounded-lg text-gray-300 hover:text-white"
+              className="p-2 hover:bg-accent rounded-full text-muted-foreground hover:text-foreground transition-colors border border-transparent hover:border-border shadow-sm hover:shadow-md"
               title="Scheduled Messages"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -362,7 +363,8 @@ export function ChatWindow({
             </button>
             <button
               onClick={() => setShowUserProfile(!showUserProfile)}
-              className="p-2 hover:bg-gray-700 rounded-lg text-gray-300 hover:text-white"
+              className="p-2 hover:bg-accent rounded-full text-muted-foreground hover:text-foreground transition-colors border border-transparent hover:border-border shadow-sm hover:shadow-md"
+              title="View Info"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -374,11 +376,11 @@ export function ChatWindow({
 
       {/* Group Members Modal */}
       {showGroupMembers && conversation?.isGroup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={() => setShowGroupMembers(false)}>
-          <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setShowGroupMembers(false)}>
+          <div className="bg-popover rounded-lg p-6 max-w-md w-full mx-4 border border-border shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-semibold text-white">Group Members</h3>
-              <button onClick={() => setShowGroupMembers(false)} className="text-gray-400 hover:text-white">
+              <h3 className="text-xl font-semibold text-foreground">Group Members</h3>
+              <button onClick={() => setShowGroupMembers(false)} className="text-muted-foreground hover:text-foreground">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -386,17 +388,17 @@ export function ChatWindow({
             </div>
             <div className="space-y-3 max-h-96 overflow-y-auto">
               {conversation.allParticipants?.filter(p => p !== null).map((participant) => (
-                <div key={participant._id} className="flex items-center gap-3 p-3 bg-gray-700 rounded-lg">
+                <div key={participant._id} className="flex items-center gap-3 p-3 bg-muted rounded-lg border border-border">
                   {participant.imageUrl ? (
                     <img src={participant.imageUrl} alt={participant.name} className="w-10 h-10 rounded-full" />
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-blue to-brand-purple flex items-center justify-center text-white font-semibold shadow-sm">
                       {participant.name[0]}
                     </div>
                   )}
                   <div className="flex-1">
-                    <div className="font-semibold text-white">{participant.name}</div>
-                    <div className="text-sm text-gray-400">{participant.email}</div>
+                    <div className="font-semibold text-foreground">{participant.name}</div>
+                    <div className="text-sm text-muted-foreground">{participant.email}</div>
                   </div>
                   {participant.isOnline && (
                     <div className="w-3 h-3 bg-green-500 rounded-full"></div>
@@ -410,11 +412,11 @@ export function ChatWindow({
 
       {/* User Profile Modal */}
       {showUserProfile && conversation?.otherUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={() => setShowUserProfile(false)}>
-          <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setShowUserProfile(false)}>
+          <div className="bg-popover rounded-lg p-6 max-w-md w-full mx-4 border border-border shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-semibold text-white">Profile Info</h3>
-              <button onClick={() => setShowUserProfile(false)} className="text-gray-400 hover:text-white">
+              <h3 className="text-xl font-semibold text-foreground">Profile Info</h3>
+              <button onClick={() => setShowUserProfile(false)} className="text-muted-foreground hover:text-foreground">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -424,24 +426,24 @@ export function ChatWindow({
               {conversation.otherUser.imageUrl ? (
                 <img src={conversation.otherUser.imageUrl} alt={conversation.otherUser.name} className="w-24 h-24 rounded-full mb-4" />
               ) : (
-                <div className="w-24 h-24 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold text-3xl mb-4">
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-brand-blue to-brand-purple flex items-center justify-center text-white font-semibold text-3xl mb-4 shadow-xl shadow-brand-purple/20">
                   {conversation.otherUser.name[0]}
                 </div>
               )}
               <div className="w-full space-y-3">
-                <div className="bg-gray-700 rounded-lg p-4">
-                  <div className="text-sm text-gray-400 mb-1">Name</div>
-                  <div className="text-white font-semibold">{conversation.otherUser.name}</div>
+                <div className="bg-muted rounded-lg p-4 border border-border shadow-sm">
+                  <div className="text-sm text-muted-foreground mb-1">Name</div>
+                  <div className="text-foreground font-semibold">{conversation.otherUser.name}</div>
                 </div>
-                <div className="bg-gray-700 rounded-lg p-4">
-                  <div className="text-sm text-gray-400 mb-1">Email</div>
-                  <div className="text-white">{conversation.otherUser.email}</div>
+                <div className="bg-muted rounded-lg p-4 border border-border shadow-sm">
+                  <div className="text-sm text-muted-foreground mb-1">Email</div>
+                  <div className="text-foreground">{conversation.otherUser.email}</div>
                 </div>
-                <div className="bg-gray-700 rounded-lg p-4">
-                  <div className="text-sm text-gray-400 mb-1">Status</div>
+                <div className="bg-muted rounded-lg p-4 border border-border shadow-sm">
+                  <div className="text-sm text-muted-foreground mb-1">Status</div>
                   <div className="flex items-center gap-2">
-                    <div className={`w-3 h-3 rounded-full ${conversation.otherUser.isOnline ? 'bg-green-500' : 'bg-gray-500'}`}></div>
-                    <div className="text-white">{conversation.otherUser.isOnline ? 'Online' : 'Offline'}</div>
+                    <div className={`w-3 h-3 rounded-full ${conversation.otherUser.isOnline ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                    <div className="text-foreground">{conversation.otherUser.isOnline ? 'Online' : 'Offline'}</div>
                   </div>
                 </div>
               </div>
@@ -450,21 +452,21 @@ export function ChatWindow({
         </div>
       )}
 
-      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-900">
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-background transition-colors">
         {/* Scheduled Messages */}
         {scheduledMessages && scheduledMessages.length > 0 && (
-          <div className="bg-blue-900/20 border border-blue-700/30 rounded-lg p-3 mb-4">
+          <div className="bg-brand-blue/10 border border-brand-blue/20 rounded-lg p-3 mb-4">
             <div className="flex items-center gap-2 mb-2">
-              <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-brand-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span className="text-sm font-medium text-blue-400">Scheduled Messages</span>
+              <span className="text-sm font-medium text-brand-blue">Scheduled Messages</span>
             </div>
             {scheduledMessages.map((scheduledMsg) => (
-              <div key={scheduledMsg._id} className="flex items-center justify-between bg-blue-900/30 rounded p-2 mb-2 last:mb-0">
+              <div key={scheduledMsg._id} className="flex items-center justify-between bg-background/50 rounded p-2 mb-2 last:mb-0 border border-brand-blue/10">
                 <div className="flex-1">
-                  <div className="text-sm text-gray-200 truncate">{scheduledMsg.content}</div>
-                  <div className="text-xs text-blue-300">
+                  <div className="text-sm text-foreground truncate">{scheduledMsg.content}</div>
+                  <div className="text-xs text-brand-blue">
                     {new Date(scheduledMsg.scheduledFor).toLocaleString()}
                   </div>
                 </div>
@@ -482,10 +484,10 @@ export function ChatWindow({
           </div>
         )}
         {!messages ? (
-          <div className="text-center text-gray-400">Loading messages...</div>
+          <div className="text-center text-muted-foreground">Loading messages...</div>
         ) : messages.length === 0 ? (
-          <div className="text-center text-gray-400 mt-8">
-            <p>No messages yet</p>
+          <div className="text-center text-muted-foreground mt-8">
+            <p className="text-lg">No messages yet</p>
             <p className="text-sm mt-2">Send a message to start the conversation</p>
           </div>
         ) : (
@@ -503,7 +505,7 @@ export function ChatWindow({
                 <div className={`max-w-xs lg:max-w-md ${isOwn ? "items-end" : "items-start"} flex flex-col relative`}>
                   <div className="flex items-center gap-2 mb-1">
                     {!isOwn && msg.sender && (
-                      <span className="text-xs text-gray-400 font-medium">{msg.sender.name}</span>
+                      <span className="text-xs text-muted-foreground font-medium">{msg.sender.name}</span>
                     )}
                   </div>
                   <div className="relative group">
@@ -513,7 +515,7 @@ export function ChatWindow({
                           type="text"
                           value={editContent}
                           onChange={(e) => setEditContent(e.target.value)}
-                          className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="flex-1 px-3 py-2 border border-border bg-gray-card text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-purple"
                           autoFocus
                         />
                         <button
@@ -527,7 +529,7 @@ export function ChatWindow({
                         </button>
                         <button
                           onClick={() => setEditingMessageId(null)}
-                          className="px-3 py-1 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 text-sm"
+                          className="px-3 py-1 bg-muted text-muted-foreground rounded-lg hover:bg-muted/80 text-sm border border-border"
                         >
                           Cancel
                         </button>
@@ -538,8 +540,8 @@ export function ChatWindow({
                           <div
                             className={`px-4 py-2 rounded-2xl ${
                               isOwn
-                                ? "bg-blue-600 text-white"
-                                : "bg-gray-800 text-gray-100"
+                                ? "bg-gradient-to-r from-brand-blue to-brand-purple text-white shadow-md shadow-brand-purple/10"
+                                : "bg-gray-card text-foreground border border-gray-border"
                             } ${msg.isDeleted ? "italic" : ""}`}
                           >
                             {msg.isDeleted ? "This message was deleted" : msg.content}
@@ -551,8 +553,8 @@ export function ChatWindow({
                           {!msg.isDeleted && hoveredMessageId === msg._id && (
                             <button
                               onClick={() => setMenuOpen(menuOpen === msg._id ? null : msg._id)}
-                              className={`absolute -top-2 w-6 h-6 flex items-center justify-center hover:bg-gray-300 rounded-full shadow-lg ${
-                                isOwn ? "-right-2 text-white bg-blue-700" : "-left-2 text-gray-700 bg-gray-200"
+                              className={`absolute -top-2 w-6 h-6 flex items-center justify-center hover:bg-muted/80 rounded-full shadow-lg ${
+                                isOwn ? "-right-2 text-white bg-blue-700" : "-left-2 text-muted-foreground bg-muted border border-border"
                               }`}
                             >
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 16 16">
@@ -565,8 +567,8 @@ export function ChatWindow({
                         </div>
 
                         {menuOpen === msg._id && isOwn && (
-                          <div className="absolute right-0 top-12 bg-white border-2 border-gray-300 rounded-lg shadow-xl z-20 min-w-[140px]">
-                            <div className="px-2 py-2 flex gap-1 border-b">
+                          <div className="absolute right-0 top-12 bg-popover border border-border rounded-lg shadow-2xl z-20 min-w-[140px] overflow-hidden">
+                            <div className="px-2 py-2 flex gap-1 border-b border-border bg-muted">
                               {REACTIONS.map((emoji) => (
                                 <button
                                   key={emoji}
@@ -574,7 +576,7 @@ export function ChatWindow({
                                     toggleReaction({ messageId: msg._id, userId: currentUserId, emoji });
                                     setMenuOpen(null);
                                   }}
-                                  className="hover:bg-gray-100 p-1 rounded text-lg"
+                                  className="hover:bg-accent p-1 rounded text-lg transition-colors"
                                 >
                                   {emoji}
                                 </button>
@@ -586,7 +588,7 @@ export function ChatWindow({
                                 setEditingMessageId(msg._id);
                                 setMenuOpen(null);
                               }}
-                              className="w-full px-4 py-2 text-left hover:bg-gray-100 flex items-center gap-2 text-gray-700"
+                              className="w-full px-4 py-2 text-left hover:bg-muted flex items-center gap-2 text-foreground transition-colors"
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -598,7 +600,7 @@ export function ChatWindow({
                                 await deleteMessage({ messageId: msg._id, userId: currentUserId });
                                 setMenuOpen(null);
                               }}
-                              className="w-full px-4 py-2 text-left text-red-600 hover:bg-red-50 rounded-b-lg flex items-center gap-2"
+                              className="w-full px-4 py-2 text-left text-red-600 hover:bg-red-500/10 rounded-b-lg flex items-center gap-2"
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -609,8 +611,8 @@ export function ChatWindow({
                         )}
                         
                         {menuOpen === msg._id && !isOwn && (
-                          <div className="absolute left-0 top-12 bg-white border-2 border-gray-300 rounded-lg shadow-xl z-20 min-w-[140px]">
-                            <div className="px-2 py-2 flex gap-1">
+                          <div className="absolute left-0 top-12 bg-popover border border-border rounded-lg shadow-2xl z-20 min-w-[140px] overflow-hidden">
+                            <div className="px-2 py-2 flex gap-1 bg-muted">
                               {REACTIONS.map((emoji) => (
                                 <button
                                   key={emoji}
@@ -618,7 +620,7 @@ export function ChatWindow({
                                     toggleReaction({ messageId: msg._id, userId: currentUserId, emoji });
                                     setMenuOpen(null);
                                   }}
-                                  className="hover:bg-gray-100 p-1 rounded text-lg"
+                                  className="hover:bg-accent p-1 rounded text-lg transition-colors"
                                 >
                                   {emoji}
                                 </button>
@@ -656,14 +658,14 @@ export function ChatWindow({
                               onMouseLeave={() => setReactionTooltip(null)}
                               className={`text-sm px-2 py-1 rounded-full border ${
                                 reaction.userIds.includes(currentUserId as string)
-                                  ? "bg-blue-100 border-blue-300 text-blue-800"
-                                  : "bg-gray-700 border-gray-600 text-gray-200"
+                                  ? "bg-brand-blue/20 border-brand-blue text-brand-blue"
+                                  : "bg-muted/50 border-gray-border text-foreground"
                               }`}
                             >
                               {reaction.emoji} {reaction.userIds.length}
                             </button>
                             {reactionTooltip?.messageId === msg._id && reactionTooltip?.emoji === reaction.emoji && (
-                              <div className={`absolute bottom-full mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg whitespace-nowrap z-30 max-w-xs ${
+                              <div className={`absolute bottom-full mb-2 px-3 py-2 bg-popover text-foreground text-xs rounded-lg shadow-lg whitespace-nowrap z-30 border border-border max-w-xs ${
                                 isOwn 
                                   ? (isLastReaction ? 'right-0' : isFirstReaction ? 'left-0' : 'left-1/2 -translate-x-1/2')
                                   : (isFirstReaction ? 'left-0' : isLastReaction ? 'right-0' : 'left-1/2 -translate-x-1/2')
@@ -684,7 +686,7 @@ export function ChatWindow({
                     </div>
                   )}
 
-                  <div className="text-xs text-gray-400 mt-1">
+                  <div className="text-xs text-muted-foreground mt-1">
                     {(() => {
                       const msgDate = new Date(msg.timestamp);
                       const today = new Date();
@@ -732,7 +734,7 @@ export function ChatWindow({
 
       {/* Typing Indicator - Always visible at bottom of messages */}
       {typingUsers && typingUsers.length > 0 && (
-        <div className="px-4 py-2 text-sm text-gray-400 bg-gray-800 border-t border-gray-700">
+        <div className="px-4 py-2 text-sm text-muted-foreground bg-gray-card border-t border-gray-border">
           <span className="italic">
             {typingUsers.map((u) => u?.name).join(", ")} {typingUsers.length === 1 ? "is" : "are"} typing...
           </span>
@@ -743,7 +745,7 @@ export function ChatWindow({
         <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-10">
           <button
             onClick={scrollToBottom}
-            className="px-3 py-1.5 bg-blue-600 text-white rounded-full hover:bg-blue-700 text-xs font-medium shadow-lg flex items-center gap-1.5"
+            className="px-3 py-1.5 bg-brand-blue text-white rounded-full hover:bg-blue-500 text-xs font-medium shadow-[0_0_15px_rgba(59,130,246,0.5)] flex items-center gap-1.5 transition-all"
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
@@ -753,13 +755,13 @@ export function ChatWindow({
         </div>
       )}
 
-      <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-700 bg-gray-800">
+      <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-border bg-gray-card backdrop-blur-sm">
         <div className="flex gap-2">
           <div className="relative">
             <button
               type="button"
               onClick={() => setShowEmojiBar(!showEmojiBar)}
-              className="px-3 py-3 bg-gray-700 text-gray-300 border border-gray-600 rounded-lg hover:bg-gray-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-full transition-colors"
               title="Add emoji"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -770,16 +772,16 @@ export function ChatWindow({
               </svg>
             </button>
             {showEmojiBar && (
-              <div className="absolute bottom-full mb-2 left-0 bg-gray-800 border border-gray-600 rounded-lg shadow-lg z-10 w-80">
+              <div className="absolute bottom-full mb-2 left-0 bg-popover border border-border rounded-lg shadow-2xl z-10 w-80 overflow-hidden">
                 {/* Category tabs */}
-                <div className="flex border-b border-gray-600">
+                <div className="flex border-b border-border bg-muted">
                   {Object.entries(EMOJI_CATEGORIES).map(([key, category]) => (
                     <button
                       key={key}
                       type="button"
                       onClick={() => setActiveEmojiCategory(key as keyof typeof EMOJI_CATEGORIES)}
-                      className={`flex-1 p-2 text-center hover:bg-gray-700 transition-colors ${
-                        activeEmojiCategory === key ? 'bg-gray-700 border-b-2 border-blue-500' : ''
+                      className={`flex-1 p-2 text-center hover:bg-muted transition-colors ${
+                        activeEmojiCategory === key ? 'bg-muted border-b-2 border-brand-blue' : ''
                       }`}
                       title={category.name}
                     >
@@ -795,7 +797,7 @@ export function ChatWindow({
                         key={`${emoji}-${index}`}
                         type="button"
                         onClick={() => insertEmoji(emoji)}
-                        className="text-xl hover:bg-gray-700 rounded p-1 transition-colors"
+                        className="text-xl hover:bg-muted rounded p-1 transition-colors"
                         title={emoji}
                       >
                         {emoji}
@@ -811,14 +813,14 @@ export function ChatWindow({
             value={message}
             onChange={(e) => handleTyping(e.target.value)}
             placeholder="Type a message..."
-            className="flex-1 px-4 py-3 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400"
+            className="flex-1 px-4 py-3 bg-gray-card text-foreground border border-gray-border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-purple placeholder-muted-foreground transition-colors"
           />
           {message.trim() && (
             <button
               type="button"
               onClick={handleEnhanceMessage}
               disabled={isEnhancing}
-              className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-500 disabled:cursor-not-allowed"
+              className="px-3 py-2 bg-gradient-to-r from-brand-blue to-brand-purple text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity shadow-md shadow-brand-purple/20"
               title="Enhance with AI"
             >
               {isEnhancing ? (
@@ -835,7 +837,7 @@ export function ChatWindow({
           <button
             type="submit"
             disabled={!message.trim()}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-brand-blue text-white rounded-lg hover:bg-blue-500 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed transition-colors shadow-md shadow-brand-blue/20"
           >
             <svg className="w-6 h-6 rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
@@ -846,11 +848,11 @@ export function ChatWindow({
 
       {/* Schedule Message Modal */}
       {showScheduleModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={() => setShowScheduleModal(false)}>
-          <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setShowScheduleModal(false)}>
+          <div className="bg-popover rounded-lg p-6 max-w-md w-full mx-4 border border-border shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-semibold text-white">Schedule Message</h3>
-              <button onClick={() => setShowScheduleModal(false)} className="text-gray-400 hover:text-white">
+              <h3 className="text-xl font-semibold text-foreground">Schedule Message</h3>
+              <button onClick={() => setShowScheduleModal(false)} className="text-muted-foreground hover:text-foreground">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -859,7 +861,7 @@ export function ChatWindow({
             <form onSubmit={handleScheduleMessage} className="space-y-4">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-medium text-gray-300">Message</label>
+                  <label className="block text-sm font-medium text-muted-foreground">Message</label>
                   <div className="flex items-center gap-2">
                     {messageToSchedule.trim() && (
                       <button
@@ -891,7 +893,7 @@ export function ChatWindow({
                       <button
                         type="button"
                         onClick={() => setShowEmojiBar(!showEmojiBar)}
-                        className="text-xs px-2 py-1 bg-gray-600 text-white rounded hover:bg-gray-500 flex items-center gap-1"
+                        className="text-xs p-1 bg-muted text-foreground border border-border rounded hover:bg-muted/80 flex items-center gap-1"
                         title="Add emoji"
                       >
                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
@@ -903,16 +905,16 @@ export function ChatWindow({
                         😊
                       </button>
                       {showEmojiBar && (
-                        <div className="absolute bottom-full mb-2 right-0 bg-gray-800 border border-gray-600 rounded-lg shadow-lg z-20 w-80">
+                        <div className="absolute bottom-full mb-2 right-0 bg-popover border border-border rounded-lg shadow-2xl z-20 w-80 overflow-hidden">
                           {/* Category tabs */}
-                          <div className="flex border-b border-gray-600">
+                          <div className="flex border-b border-border bg-muted">
                             {Object.entries(EMOJI_CATEGORIES).map(([key, category]) => (
                               <button
                                 key={key}
                                 type="button"
                                 onClick={() => setActiveEmojiCategory(key as keyof typeof EMOJI_CATEGORIES)}
-                                className={`flex-1 p-2 text-center hover:bg-gray-700 transition-colors ${
-                                  activeEmojiCategory === key ? 'bg-gray-700 border-b-2 border-blue-500' : ''
+                                className={`flex-1 p-2 text-center hover:bg-muted transition-colors ${
+                                  activeEmojiCategory === key ? 'bg-muted border-b-2 border-brand-blue' : ''
                                 }`}
                                 title={category.name}
                               >
@@ -931,7 +933,7 @@ export function ChatWindow({
                                     setMessageToSchedule(prev => prev + emoji);
                                     setShowEmojiBar(false);
                                   }}
-                                  className="text-xl hover:bg-gray-700 rounded p-1 transition-colors"
+                                  className="text-xl hover:bg-muted rounded p-1 transition-colors"
                                   title={emoji}
                                 >
                                   {emoji}
@@ -948,29 +950,29 @@ export function ChatWindow({
                   value={messageToSchedule}
                   onChange={(e) => setMessageToSchedule(e.target.value)}
                   placeholder="Type your message..."
-                  className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400"
+                  className="w-full px-3 py-2 bg-gray-card text-foreground border border-gray-border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-purple placeholder-muted-foreground"
                   rows={3}
                   required
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Date</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">Date</label>
                   <input
                     type="date"
                     value={scheduleDate}
                     onChange={(e) => setScheduleDate(e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 bg-gray-card text-foreground border border-gray-border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-purple"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Time</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">Time</label>
                   <input
                     type="time"
                     value={scheduleTime}
                     onChange={(e) => setScheduleTime(e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 bg-gray-card text-foreground border border-gray-border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-purple"
                     required
                   />
                 </div>
@@ -979,7 +981,7 @@ export function ChatWindow({
                 <button
                   type="button"
                   onClick={() => setShowScheduleModal(false)}
-                  className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+                  className="flex-1 px-4 py-2 bg-muted text-foreground rounded-lg hover:bg-muted/80 border border-border transition-colors"
                 >
                   Cancel
                 </button>
@@ -997,17 +999,17 @@ export function ChatWindow({
 
       {/* Schedule Calendar Modal */}
       {showScheduleCalendar && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={() => setShowScheduleCalendar(false)}>
-          <div className="bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setShowScheduleCalendar(false)}>
+          <div className="bg-popover rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto border border-border shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-white flex items-center gap-2">
+              <h3 className="text-xl font-semibold text-foreground flex items-center gap-2">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 Scheduled Messages
               </h3>
               {!showScheduleForm && (
-                <button onClick={() => setShowScheduleCalendar(false)} className="text-gray-400 hover:text-white">
+                <button onClick={() => setShowScheduleCalendar(false)} className="text-muted-foreground hover:text-foreground">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
@@ -1018,7 +1020,7 @@ export function ChatWindow({
               <form onSubmit={handleScheduleMessage} className="space-y-4">
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="block text-sm font-medium text-gray-300">Message</label>
+                    <label className="block text-sm font-medium text-muted-foreground">Message</label>
                     <div className="flex items-center gap-2">
                       {messageToSchedule.trim() && (
                         <button
@@ -1050,7 +1052,7 @@ export function ChatWindow({
                         <button
                           type="button"
                           onClick={() => setShowEmojiBar(!showEmojiBar)}
-                          className="text-xs px-2 py-1 bg-gray-600 text-white rounded hover:bg-gray-500 flex items-center gap-1"
+                          className="text-xs p-1 bg-muted text-foreground border border-border rounded hover:bg-muted/80 flex items-center gap-1"
                           title="Add emoji"
                         >
                           <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
@@ -1062,16 +1064,16 @@ export function ChatWindow({
                           😊
                         </button>
                         {showEmojiBar && (
-                          <div className="absolute bottom-full mb-2 right-0 bg-gray-800 border border-gray-600 rounded-lg shadow-lg z-20 w-80">
+                          <div className="absolute bottom-full mb-2 right-0 bg-popover border border-border rounded-lg shadow-2xl z-20 w-80 overflow-hidden">
                             {/* Category tabs */}
-                            <div className="flex border-b border-gray-600">
+                            <div className="flex border-b border-border bg-muted">
                               {Object.entries(EMOJI_CATEGORIES).map(([key, category]) => (
                                 <button
                                   key={key}
                                   type="button"
                                   onClick={() => setActiveEmojiCategory(key as keyof typeof EMOJI_CATEGORIES)}
-                                  className={`flex-1 p-2 text-center hover:bg-gray-700 transition-colors ${
-                                    activeEmojiCategory === key ? 'bg-gray-700 border-b-2 border-blue-500' : ''
+                                  className={`flex-1 p-2 text-center hover:bg-muted transition-colors ${
+                                    activeEmojiCategory === key ? 'bg-muted border-b-2 border-brand-purple' : ''
                                   }`}
                                   title={category.name}
                                 >
@@ -1090,7 +1092,7 @@ export function ChatWindow({
                                       setMessageToSchedule(prev => prev + emoji);
                                       setShowEmojiBar(false);
                                     }}
-                                    className="text-xl hover:bg-gray-700 rounded p-1 transition-colors"
+                                    className="text-xl hover:bg-muted rounded p-1 transition-colors"
                                     title={emoji}
                                   >
                                     {emoji}
@@ -1107,29 +1109,29 @@ export function ChatWindow({
                     value={messageToSchedule}
                     onChange={(e) => setMessageToSchedule(e.target.value)}
                     placeholder="Type your message..."
-                    className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400"
+                    className="w-full px-3 py-2 bg-gray-card text-foreground border border-gray-border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-purple placeholder-muted-foreground"
                     rows={3}
                     required
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Date</label>
+                    <label className="block text-sm font-medium text-muted-foreground mb-2">Date</label>
                     <input
                       type="date"
                       value={scheduleDate}
                       onChange={(e) => setScheduleDate(e.target.value)}
-                      className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 bg-gray-card text-foreground border border-gray-border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-purple transition-colors"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Time</label>
+                    <label className="block text-sm font-medium text-muted-foreground mb-2">Time</label>
                     <input
                       type="time"
                       value={scheduleTime}
                       onChange={(e) => setScheduleTime(e.target.value)}
-                      className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 bg-gray-card text-foreground border border-gray-border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-purple transition-colors"
                       required
                     />
                   </div>
@@ -1138,7 +1140,7 @@ export function ChatWindow({
                   <button
                     type="button"
                     onClick={() => setShowScheduleForm(false)}
-                    className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+                    className="flex-1 px-4 py-2 bg-muted text-foreground rounded-lg hover:bg-muted/80 border border-border transition-colors"
                   >
                     Back
                   </button>
@@ -1180,11 +1182,11 @@ export function ChatWindow({
                   
                   return (
                     <div key={scheduledMsg._id} className={`p-4 rounded-lg border ${
-                      isPast ? 'bg-red-900/20 border-red-700/30' : 'bg-gray-700 border-gray-600'
+                      isPast ? 'bg-red-500/10 border-red-500/30' : 'bg-muted/30 border-gray-border'
                     }`}>
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <div className="text-white mb-2">{scheduledMsg.content}</div>
+                          <div className="text-foreground mb-2">{scheduledMsg.content}</div>
                           <div className="flex items-center gap-4 text-sm">
                             <div className={`flex items-center gap-1 ${
                               isPast ? 'text-red-400' : isToday ? 'text-yellow-400' : 'text-blue-400'
@@ -1218,10 +1220,10 @@ export function ChatWindow({
               </div>
             ) : (
               <div className="text-center py-12">
-                <svg className="w-16 h-16 text-gray-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <p className="text-gray-400 mb-4">No scheduled messages</p>
+                <p className="text-muted-foreground mb-4">No scheduled messages</p>
                 <button
                   onClick={() => {
                     setMessageToSchedule("");
@@ -1248,16 +1250,16 @@ export function ChatWindow({
 
       {/* AI Enhancement Modal */}
       {showEnhanceModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={() => setShowEnhanceModal(false)}>
-          <div className="bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setShowEnhanceModal(false)}>
+          <div className="bg-popover rounded-lg p-6 max-w-2xl w-full mx-4 border border-border shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-semibold text-white flex items-center gap-2">
+              <h3 className="text-xl font-semibold text-foreground flex items-center gap-2">
                 <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
                 AI Enhanced Message
               </h3>
-              <button onClick={() => setShowEnhanceModal(false)} className="text-gray-400 hover:text-white">
+              <button onClick={() => setShowEnhanceModal(false)} className="text-muted-foreground hover:text-foreground">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -1266,7 +1268,7 @@ export function ChatWindow({
             
             <div className="space-y-4">
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-300 mb-2">Enhancement Type</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-2">Enhancement Type</label>
                 <select
                   value={enhancementType}
                   onChange={(e) => {
@@ -1274,7 +1276,7 @@ export function ChatWindow({
                     setTimeout(() => reEnhanceMessage(), 100);
                   }}
                   disabled={isEnhancing}
-                  className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                  className="w-full px-3 py-2 bg-gray-card text-foreground border border-gray-border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-purple disabled:opacity-50"
                 >
                   <option value="improve">General Improvement</option>
                   <option value="grammar">Fix Grammar</option>
@@ -1293,15 +1295,15 @@ export function ChatWindow({
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Original Message</label>
-                <div className="p-3 bg-gray-700 rounded-lg text-gray-200">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">Original Message</label>
+                <div className="p-3 bg-muted border border-border rounded-lg text-foreground shadow-sm">
                   {message}
                 </div>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Enhanced Message</label>
-                <div className="p-3 bg-blue-900/20 border border-blue-700/30 rounded-lg text-white">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">Enhanced Message</label>
+                <div className="p-3 bg-brand-blue/10 border border-brand-blue/30 rounded-lg text-foreground shadow-sm">
                   {enhancedMessage}
                 </div>
               </div>
@@ -1310,7 +1312,7 @@ export function ChatWindow({
             <div className="flex gap-3 pt-6">
               <button
                 onClick={() => setShowEnhanceModal(false)}
-                className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+                className="flex-1 px-4 py-2 bg-muted text-foreground rounded-lg hover:bg-muted/80 border border-border transition-colors"
               >
                 Keep Original
               </button>
