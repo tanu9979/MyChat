@@ -55,6 +55,10 @@ export function ChatWindow({
   const [scheduleDate, setScheduleDate] = useState("");
   const [scheduleTime, setScheduleTime] = useState("");
   const [messageToSchedule, setMessageToSchedule] = useState("");
+  const [showEnhanceModal, setShowEnhanceModal] = useState(false);
+  const [enhancedMessage, setEnhancedMessage] = useState("");
+  const [isEnhancing, setIsEnhancing] = useState(false);
+  const [enhancementType, setEnhancementType] = useState<'improve' | 'grammar' | 'professional' | 'casual' | 'clear'>('improve');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
@@ -174,6 +178,62 @@ export function ChatWindow({
     now.setHours(now.getHours() + 1);
     setScheduleDate(now.toISOString().split('T')[0]);
     setScheduleTime(now.toTimeString().slice(0, 5));
+  };
+
+  const handleEnhanceMessage = async () => {
+    if (!message.trim()) return;
+    
+    setIsEnhancing(true);
+    try {
+      const response = await fetch('/api/enhance-message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: message.trim(), enhancementType })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setEnhancedMessage(data.enhanced);
+        setShowEnhanceModal(true);
+      } else {
+        alert(data.error || 'Failed to enhance message');
+      }
+    } catch (error) {
+      alert('Failed to enhance message. Please try again.');
+    } finally {
+      setIsEnhancing(false);
+    }
+  };
+
+  const reEnhanceMessage = async () => {
+    if (!message.trim()) return;
+    
+    setIsEnhancing(true);
+    try {
+      const response = await fetch('/api/enhance-message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: message.trim(), enhancementType })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setEnhancedMessage(data.enhanced);
+      } else {
+        alert(data.error || 'Failed to enhance message');
+      }
+    } catch (error) {
+      alert('Failed to enhance message. Please try again.');
+    } finally {
+      setIsEnhancing(false);
+    }
+  };
+
+  const useEnhancedMessage = () => {
+    setMessage(enhancedMessage);
+    setShowEnhanceModal(false);
   };
 
   const scrollToBottom = () => {
@@ -656,6 +716,25 @@ export function ChatWindow({
             placeholder="Type a message..."
             className="flex-1 px-4 py-3 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400"
           />
+          {message.trim() && (
+            <button
+              type="button"
+              onClick={handleEnhanceMessage}
+              disabled={isEnhancing}
+              className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-500 disabled:cursor-not-allowed"
+              title="Enhance with AI"
+            >
+              {isEnhancing ? (
+                <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              )}
+            </button>
+          )}
           <button
             type="submit"
             disabled={!message.trim()}
@@ -682,7 +761,35 @@ export function ChatWindow({
             </div>
             <form onSubmit={handleScheduleMessage} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Message</label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-gray-300">Message</label>
+                  {messageToSchedule.trim() && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          const response = await fetch('/api/enhance-message', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ message: messageToSchedule.trim(), enhancementType: 'improve' })
+                          });
+                          const data = await response.json();
+                          if (response.ok) {
+                            setMessageToSchedule(data.enhanced);
+                          }
+                        } catch (error) {
+                          console.error('Enhancement failed:', error);
+                        }
+                      }}
+                      className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-1"
+                    >
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                      Enhance
+                    </button>
+                  )}
+                </div>
                 <textarea
                   value={messageToSchedule}
                   onChange={(e) => setMessageToSchedule(e.target.value)}
@@ -756,7 +863,35 @@ export function ChatWindow({
             {showScheduleForm ? (
               <form onSubmit={handleScheduleMessage} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Message</label>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-medium text-gray-300">Message</label>
+                    {messageToSchedule.trim() && (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            const response = await fetch('/api/enhance-message', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ message: messageToSchedule.trim(), enhancementType: 'improve' })
+                            });
+                            const data = await response.json();
+                            if (response.ok) {
+                              setMessageToSchedule(data.enhanced);
+                            }
+                          } catch (error) {
+                            console.error('Enhancement failed:', error);
+                          }
+                        }}
+                        className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-1"
+                      >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        Enhance
+                      </button>
+                    )}
+                  </div>
                   <textarea
                     value={messageToSchedule}
                     onChange={(e) => setMessageToSchedule(e.target.value)}
@@ -896,6 +1031,85 @@ export function ChatWindow({
             )}
             </>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* AI Enhancement Modal */}
+      {showEnhanceModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={() => setShowEnhanceModal(false)}>
+          <div className="bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-semibold text-white flex items-center gap-2">
+                <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                AI Enhanced Message
+              </h3>
+              <button onClick={() => setShowEnhanceModal(false)} className="text-gray-400 hover:text-white">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-300 mb-2">Enhancement Type</label>
+                <select
+                  value={enhancementType}
+                  onChange={(e) => {
+                    setEnhancementType(e.target.value as any);
+                    setTimeout(() => reEnhanceMessage(), 100);
+                  }}
+                  disabled={isEnhancing}
+                  className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                >
+                  <option value="improve">General Improvement</option>
+                  <option value="grammar">Fix Grammar</option>
+                  <option value="professional">Make Professional</option>
+                  <option value="casual">Make Casual</option>
+                  <option value="clear">Make Clearer</option>
+                </select>
+                {isEnhancing && (
+                  <div className="mt-2 text-sm text-blue-400 flex items-center gap-2">
+                    <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Re-enhancing message...
+                  </div>
+                )}
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Original Message</label>
+                <div className="p-3 bg-gray-700 rounded-lg text-gray-200">
+                  {message}
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Enhanced Message</label>
+                <div className="p-3 bg-blue-900/20 border border-blue-700/30 rounded-lg text-white">
+                  {enhancedMessage}
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex gap-3 pt-6">
+              <button
+                onClick={() => setShowEnhanceModal(false)}
+                className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+              >
+                Keep Original
+              </button>
+              <button
+                onClick={useEnhancedMessage}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Use Enhanced
+              </button>
+            </div>
           </div>
         </div>
       )}
