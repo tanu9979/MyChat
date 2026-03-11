@@ -8,6 +8,45 @@ import { useState, useEffect, useRef } from "react";
 // Fixed set of reaction emojis available for messages
 const REACTIONS = ["👍", "❤️", "😂", "😮", "😢"];
 
+// Comprehensive emoji categories
+const EMOJI_CATEGORIES = {
+  smileys: {
+    name: "Smileys & People",
+    icon: "😀",
+    emojis: ["😀", "😃", "😄", "😁", "😆", "😅", "🤣", "😂", "🙂", "🙃", "😉", "😊", "😇", "🥰", "😍", "🤩", "😘", "😗", "😚", "😙", "😋", "😛", "😜", "🤪", "😝", "🤑", "🤗", "🤭", "🤫", "🤔", "🤐", "🤨", "😐", "😑", "😶", "😏", "😒", "🙄", "😬", "🤥", "😔", "😪", "🤤", "😴", "😷", "🤒", "🤕", "🤢", "🤮", "🤧", "🥵", "🥶", "🥴", "😵", "🤯", "🤠", "🥳", "😎", "🤓", "🧐"]
+  },
+  animals: {
+    name: "Animals & Nature",
+    icon: "🐶",
+    emojis: ["🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼", "🐨", "🐯", "🦁", "🐮", "🐷", "🐽", "🐸", "🐵", "🙈", "🙉", "🙊", "🐒", "🐔", "🐧", "🐦", "🐤", "🐣", "🐥", "🦆", "🦅", "🦉", "🦇", "🐺", "🐗", "🐴", "🦄", "🐝", "🐛", "🦋", "🐌", "🐞", "🐜", "🦟", "🦗", "🕷️", "🕸️", "🦂", "🐢", "🐍", "🦎", "🦖", "🦕", "🐙", "🦑", "🦐", "🦞", "🦀", "🐡", "🐠", "🐟", "🐬", "🐳", "🐋", "🦈", "🐊", "🐅", "🐆", "🦓", "🦍", "🦧", "🐘", "🦛", "🦏", "🐪", "🐫", "🦒", "🦘", "🐃", "🐂", "🐄", "🐎", "🐖", "🐏", "🐑", "🦙", "🐐", "🦌", "🐕", "🐩", "🦮", "🐕‍🦺", "🐈", "🐓", "🦃", "🦚", "🦜", "🦢", "🦩", "🕊️", "🐇", "🦝", "🦨", "🦡", "🦦", "🦥", "🐁", "🐀", "🐿️"]
+  },
+  food: {
+    name: "Food & Drink",
+    icon: "🍎",
+    emojis: ["🍎", "🍐", "🍊", "🍋", "🍌", "🍉", "🍇", "🍓", "🫐", "🍈", "🍒", "🍑", "🥭", "🍍", "🥥", "🥝", "🍅", "🍆", "🥑", "🥦", "🥬", "🥒", "🌶️", "🫑", "🌽", "🥕", "🫒", "🧄", "🧅", "🥔", "🍠", "🥐", "🥯", "🍞", "🥖", "🥨", "🧀", "🥚", "🍳", "🧈", "🥞", "🧇", "🥓", "🥩", "🍗", "🍖", "🦴", "🌭", "🍔", "🍟", "🍕", "🥪", "🥙", "🧆", "🌮", "🌯", "🫔", "🥗", "🥘", "🫕", "🥫", "🍝", "🍜", "🍲", "🍛", "🍣", "🍱", "🥟", "🦪", "🍤", "🍙", "🍚", "🍘", "🍥", "🥠", "🥮", "🍢", "🍡", "🍧", "🍨", "🍦", "🥧", "🧁", "🍰", "🎂", "🍮", "🍭", "🍬", "🍫", "🍿", "🍩", "🍪", "🌰", "🥜", "🍯"]
+  },
+  activities: {
+    name: "Activities",
+    icon: "⚽",
+    emojis: ["⚽", "🏀", "🏈", "⚾", "🥎", "🎾", "🏐", "🏉", "🥏", "🎱", "🪀", "🏓", "🏸", "🏒", "🏑", "🥍", "🏏", "🪃", "🥅", "⛳", "🪁", "🏹", "🎣", "🤿", "🥊", "🥋", "🎽", "🛹", "🛷", "⛸️", "🥌", "🎿", "⛷️", "🏂", "🪂", "🏋️‍♀️", "🏋️", "🏋️‍♂️", "🤼‍♀️", "🤼", "🤼‍♂️", "🤸‍♀️", "🤸", "🤸‍♂️", "⛹️‍♀️", "⛹️", "⛹️‍♂️", "🤺", "🤾‍♀️", "🤾", "🤾‍♂️", "🏌️‍♀️", "🏌️", "🏌️‍♂️", "🏇", "🧘‍♀️", "🧘", "🧘‍♂️", "🏄‍♀️", "🏄", "🏄‍♂️", "🏊‍♀️", "🏊", "🏊‍♂️", "🤽‍♀️", "🤽", "🤽‍♂️", "🚣‍♀️", "🚣", "🚣‍♂️", "🧗‍♀️", "🧗", "🧗‍♂️", "🚵‍♀️", "🚵", "🚵‍♂️", "🚴‍♀️", "🚴", "🚴‍♂️", "🏆", "🥇", "🥈", "🥉", "🏅", "🎖️", "🏵️", "🎗️", "🎫", "🎟️", "🎪", "🤹‍♀️", "🤹", "🤹‍♂️", "🎭", "🩰", "🎨", "🎬", "🎤", "🎧", "🎼", "🎵", "🎶", "🥇", "🥈", "🥉", "🏆", "🏅", "🎖️"]
+  },
+  objects: {
+    name: "Objects",
+    icon: "📱",
+    emojis: ["📱", "📲", "💻", "⌨️", "🖥️", "🖨️", "🖱️", "🖲️", "🕹️", "🗜️", "💽", "💾", "💿", "📀", "📼", "📷", "📸", "📹", "🎥", "📽️", "🎞️", "📞", "☎️", "📟", "📠", "📺", "📻", "🎙️", "🎚️", "🎛️", "🧭", "⏱️", "⏲️", "⏰", "🕰️", "⌛", "⏳", "📡", "🔋", "🔌", "💡", "🔦", "🕯️", "🪔", "🧯", "🛢️", "💸", "💵", "💴", "💶", "💷", "🪙", "💰", "💳", "💎", "⚖️", "🪜", "🧰", "🔧", "🔨", "⚒️", "🛠️", "⛏️", "🪓", "🪚", "🔩", "⚙️", "🪤", "🧱", "⛓️", "🧲", "🔫", "💣", "🧨", "🪓", "🔪", "🗡️", "⚔️", "🛡️", "🚬", "⚰️", "🪦", "⚱️", "🏺", "🔮", "📿", "🧿", "💈", "⚗️", "🔭", "🔬", "🕳️", "🩹", "🩺", "💊", "💉", "🩸", "🧬", "🦠", "🧫", "🧪", "🌡️", "🧹", "🪣", "🧽", "🧴", "🛎️", "🔑", "🗝️", "🚪", "🪑", "🛋️", "🛏️", "🛌", "🧸", "🪆", "🖼️", "🪞", "🪟", "🛍️", "🛒", "🎁", "🎈", "🎏", "🎀", "🪄", "🪅", "🎊", "🎉", "🎎", "🏮", "🎐", "🧧"]
+  },
+  symbols: {
+    name: "Symbols",
+    icon: "❤️",
+    emojis: ["❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤍", "🤎", "💔", "❣️", "💕", "💞", "💓", "💗", "💖", "💘", "💝", "💟", "☮️", "✝️", "☪️", "🕉️", "☸️", "✡️", "🔯", "🕎", "☯️", "☦️", "🛐", "⛎", "♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓", "🆔", "⚛️", "🉑", "☢️", "☣️", "📴", "📳", "🈶", "🈚", "🈸", "🈺", "🈷️", "✴️", "🆚", "💮", "🉐", "㊙️", "㊗️", "🈴", "🈵", "🈹", "🈲", "🅰️", "🅱️", "🆎", "🆑", "🅾️", "🆘", "❌", "⭕", "🛑", "⛔", "📛", "🚫", "💯", "💢", "♨️", "🚷", "🚯", "🚳", "🚱", "🔞", "📵", "🚭", "❗", "❕", "❓", "❔", "‼️", "⁉️", "🔅", "🔆", "〽️", "⚠️", "🚸", "🔱", "⚜️", "🔰", "♻️", "✅", "🈯", "💹", "❇️", "✳️", "❎", "🌐", "💠", "Ⓜ️", "🌀", "💤", "🏧", "🚾", "♿", "🅿️", "🛗", "🈳", "🈂️", "🛂", "🛃", "🛄", "🛅", "🚹", "🚺", "🚼", "⚧️", "🚻", "🚮", "🎦", "📶", "🈁", "🔣", "ℹ️", "🔤", "🔡", "🔠", "🆖", "🆗", "🆙", "🆒", "🆕", "🆓", "0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+  },
+  flags: {
+    name: "Flags",
+    icon: "🏁",
+    emojis: ["🏁", "🚩", "🎌", "🏴", "🏳️", "🏳️‍🌈", "🏳️‍⚧️", "🏴‍☠️", "🇦🇫", "🇦🇽", "🇦🇱", "🇩🇿", "🇦🇸", "🇦🇩", "🇦🇴", "🇦🇮", "🇦🇶", "🇦🇬", "🇦🇷", "🇦🇲", "🇦🇼", "🇦🇺", "🇦🇹", "🇦🇿", "🇧🇸", "🇧🇭", "🇧🇩", "🇧🇧", "🇧🇾", "🇧🇪", "🇧🇿", "🇧🇯", "🇧🇲", "🇧🇹", "🇧🇴", "🇧🇦", "🇧🇼", "🇧🇷", "🇮🇴", "🇻🇬", "🇧🇳", "🇧🇬", "🇧🇫", "🇧🇮", "🇰🇭", "🇨🇲", "🇨🇦", "🇮🇨", "🇨🇻", "🇧🇶", "🇰🇾", "🇨🇫", "🇹🇩", "🇨🇱", "🇨🇳", "🇨🇽", "🇨🇨", "🇨🇴", "🇰🇲", "🇨🇬", "🇨🇩", "🇨🇰", "🇨🇷", "🇨🇮", "🇭🇷", "🇨🇺", "🇨🇼", "🇨🇾", "🇨🇿", "🇩🇰", "🇩🇯", "🇩🇲", "🇩🇴", "🇪🇨", "🇪🇬", "🇸🇻", "🇬🇶", "🇪🇷", "🇪🇪", "🇪🇹", "🇪🇺", "🇫🇰", "🇫🇴", "🇫🇯", "🇫🇮", "🇫🇷", "🇬🇫", "🇵🇫", "🇹🇫", "🇬🇦", "🇬🇲", "🇬🇪", "🇩🇪", "🇬🇭", "🇬🇮", "🇬🇷", "🇬🇱", "🇬🇩", "🇬🇵", "🇬🇺", "🇬🇹", "🇬🇬", "🇬🇳", "🇬🇼", "🇬🇾", "🇭🇹", "🇭🇳", "🇭🇰", "🇭🇺", "🇮🇸", "🇮🇳", "🇮🇩", "🇮🇷", "🇮🇶", "🇮🇪", "🇮🇲", "🇮🇱", "🇮🇹", "🇯🇲", "🇯🇵", "🎌", "🇯🇪", "🇯🇴", "🇰🇿", "🇰🇪", "🇰🇮", "🇽🇰", "🇰🇼", "🇰🇬", "🇱🇦", "🇱🇻", "🇱🇧", "🇱🇸", "🇱🇷", "🇱🇾", "🇱🇮", "🇱🇹", "🇱🇺", "🇲🇴", "🇲🇰", "🇲🇬", "🇲🇼", "🇲🇾", "🇲🇻", "🇲🇱", "🇲🇹", "🇲🇭", "🇲🇶", "🇲🇷", "🇲🇺", "🇾🇹", "🇲🇽", "🇫🇲", "🇲🇩", "🇲🇨", "🇲🇳", "🇲🇪", "🇲🇸", "🇲🇦", "🇲🇿", "🇲🇲", "🇳🇦", "🇳🇷", "🇳🇵", "🇳🇱", "🇳🇨", "🇳🇿", "🇳🇮", "🇳🇪", "🇳🇬", "🇳🇺", "🇳🇫", "🇰🇵", "🇲🇵", "🇳🇴", "🇴🇲", "🇵🇰", "🇵🇼", "🇵🇸", "🇵🇦", "🇵🇬", "🇵🇾", "🇵🇪", "🇵🇭", "🇵🇳", "🇵🇱", "🇵🇹", "🇵🇷", "🇶🇦", "🇷🇪", "🇷🇴", "🇷🇺", "🇷🇼", "🇼🇸", "🇸🇲", "🇸🇹", "🇸🇦", "🇸🇳", "🇷🇸", "🇸🇨", "🇸🇱", "🇸🇬", "🇸🇽", "🇸🇰", "🇸🇮", "🇬🇸", "🇸🇧", "🇸🇴", "🇿🇦", "🇰🇷", "🇸🇸", "🇪🇸", "🇱🇰", "🇧🇱", "🇸🇭", "🇰🇳", "🇱🇨", "🇵🇲", "🇻🇨", "🇸🇩", "🇸🇷", "🇸🇿", "🇸🇪", "🇨🇭", "🇸🇾", "🇹🇼", "🇹🇯", "🇹🇿", "🇹🇭", "🇹🇱", "🇹🇬", "🇹🇰", "🇹🇴", "🇹🇹", "🇹🇳", "🇹🇷", "🇹🇲", "🇹🇨", "🇹🇻", "🇻🇮", "🇺🇬", "🇺🇦", "🇦🇪", "🇬🇧", "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "🏴󠁧󠁢󠁳󠁣󠁴󠁿", "🏴󠁧󠁢󠁷󠁬󠁳󠁿", "🇺🇸", "🇺🇾", "🇺🇿", "🇻🇺", "🇻🇦", "🇻🇪", "🇻🇳", "🇼🇫", "🇪🇭", "🇾🇪", "🇿🇲", "🇿🇼"]
+  }
+};
+
 /**
  * ChatWindow component - Main messaging interface
  * Features: Real-time messages, typing indicators, reactions, edit/delete, auto-scroll
@@ -59,6 +98,8 @@ export function ChatWindow({
   const [enhancedMessage, setEnhancedMessage] = useState("");
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [enhancementType, setEnhancementType] = useState<'improve' | 'grammar' | 'professional' | 'casual' | 'clear'>('improve');
+  const [showEmojiBar, setShowEmojiBar] = useState(false);
+  const [activeEmojiCategory, setActiveEmojiCategory] = useState<keyof typeof EMOJI_CATEGORIES>('smileys');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
@@ -122,6 +163,11 @@ export function ChatWindow({
     setMessage("");
     setTyping({ conversationId, userId: currentUserId, isTyping: false });
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const insertEmoji = (emoji: string) => {
+    setMessage(prev => prev + emoji);
+    setShowEmojiBar(false);
   };
 
   const handleTyping = (value: string) => {
@@ -709,6 +755,57 @@ export function ChatWindow({
 
       <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-700 bg-gray-800">
         <div className="flex gap-2">
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowEmojiBar(!showEmojiBar)}
+              className="px-3 py-3 bg-gray-700 text-gray-300 border border-gray-600 rounded-lg hover:bg-gray-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              title="Add emoji"
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="2"/>
+                <circle cx="8" cy="10" r="1"/>
+                <circle cx="16" cy="10" r="1"/>
+                <path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round"/>
+              </svg>
+            </button>
+            {showEmojiBar && (
+              <div className="absolute bottom-full mb-2 left-0 bg-gray-800 border border-gray-600 rounded-lg shadow-lg z-10 w-80">
+                {/* Category tabs */}
+                <div className="flex border-b border-gray-600">
+                  {Object.entries(EMOJI_CATEGORIES).map(([key, category]) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setActiveEmojiCategory(key as keyof typeof EMOJI_CATEGORIES)}
+                      className={`flex-1 p-2 text-center hover:bg-gray-700 transition-colors ${
+                        activeEmojiCategory === key ? 'bg-gray-700 border-b-2 border-blue-500' : ''
+                      }`}
+                      title={category.name}
+                    >
+                      {category.icon}
+                    </button>
+                  ))}
+                </div>
+                {/* Emoji grid */}
+                <div className="p-3 max-h-48 overflow-y-auto">
+                  <div className="grid grid-cols-8 gap-1">
+                    {EMOJI_CATEGORIES[activeEmojiCategory].emojis.map((emoji, index) => (
+                      <button
+                        key={`${emoji}-${index}`}
+                        type="button"
+                        onClick={() => insertEmoji(emoji)}
+                        className="text-xl hover:bg-gray-700 rounded p-1 transition-colors"
+                        title={emoji}
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
           <input
             type="text"
             value={message}
@@ -763,32 +860,89 @@ export function ChatWindow({
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="block text-sm font-medium text-gray-300">Message</label>
-                  {messageToSchedule.trim() && (
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        try {
-                          const response = await fetch('/api/enhance-message', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ message: messageToSchedule.trim(), enhancementType: 'improve' })
-                          });
-                          const data = await response.json();
-                          if (response.ok) {
-                            setMessageToSchedule(data.enhanced);
+                  <div className="flex items-center gap-2">
+                    {messageToSchedule.trim() && (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            const response = await fetch('/api/enhance-message', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ message: messageToSchedule.trim(), enhancementType: 'improve' })
+                            });
+                            const data = await response.json();
+                            if (response.ok) {
+                              setMessageToSchedule(data.enhanced);
+                            }
+                          } catch (error) {
+                            console.error('Enhancement failed:', error);
                           }
-                        } catch (error) {
-                          console.error('Enhancement failed:', error);
-                        }
-                      }}
-                      className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-1"
-                    >
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                      </svg>
-                      Enhance
-                    </button>
-                  )}
+                        }}
+                        className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-1"
+                      >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        Enhance
+                      </button>
+                    )}
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setShowEmojiBar(!showEmojiBar)}
+                        className="text-xs px-2 py-1 bg-gray-600 text-white rounded hover:bg-gray-500 flex items-center gap-1"
+                        title="Add emoji"
+                      >
+                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                          <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="2"/>
+                          <circle cx="8" cy="10" r="1"/>
+                          <circle cx="16" cy="10" r="1"/>
+                          <path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round"/>
+                        </svg>
+                        😊
+                      </button>
+                      {showEmojiBar && (
+                        <div className="absolute bottom-full mb-2 right-0 bg-gray-800 border border-gray-600 rounded-lg shadow-lg z-20 w-80">
+                          {/* Category tabs */}
+                          <div className="flex border-b border-gray-600">
+                            {Object.entries(EMOJI_CATEGORIES).map(([key, category]) => (
+                              <button
+                                key={key}
+                                type="button"
+                                onClick={() => setActiveEmojiCategory(key as keyof typeof EMOJI_CATEGORIES)}
+                                className={`flex-1 p-2 text-center hover:bg-gray-700 transition-colors ${
+                                  activeEmojiCategory === key ? 'bg-gray-700 border-b-2 border-blue-500' : ''
+                                }`}
+                                title={category.name}
+                              >
+                                {category.icon}
+                              </button>
+                            ))}
+                          </div>
+                          {/* Emoji grid */}
+                          <div className="p-3 max-h-48 overflow-y-auto">
+                            <div className="grid grid-cols-8 gap-1">
+                              {EMOJI_CATEGORIES[activeEmojiCategory].emojis.map((emoji, index) => (
+                                <button
+                                  key={`schedule-${emoji}-${index}`}
+                                  type="button"
+                                  onClick={() => {
+                                    setMessageToSchedule(prev => prev + emoji);
+                                    setShowEmojiBar(false);
+                                  }}
+                                  className="text-xl hover:bg-gray-700 rounded p-1 transition-colors"
+                                  title={emoji}
+                                >
+                                  {emoji}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
                 <textarea
                   value={messageToSchedule}
@@ -865,32 +1019,89 @@ export function ChatWindow({
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <label className="block text-sm font-medium text-gray-300">Message</label>
-                    {messageToSchedule.trim() && (
-                      <button
-                        type="button"
-                        onClick={async () => {
-                          try {
-                            const response = await fetch('/api/enhance-message', {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ message: messageToSchedule.trim(), enhancementType: 'improve' })
-                            });
-                            const data = await response.json();
-                            if (response.ok) {
-                              setMessageToSchedule(data.enhanced);
+                    <div className="flex items-center gap-2">
+                      {messageToSchedule.trim() && (
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            try {
+                              const response = await fetch('/api/enhance-message', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ message: messageToSchedule.trim(), enhancementType: 'improve' })
+                              });
+                              const data = await response.json();
+                              if (response.ok) {
+                                setMessageToSchedule(data.enhanced);
+                              }
+                            } catch (error) {
+                              console.error('Enhancement failed:', error);
                             }
-                          } catch (error) {
-                            console.error('Enhancement failed:', error);
-                          }
-                        }}
-                        className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-1"
-                      >
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                        Enhance
-                      </button>
-                    )}
+                          }}
+                          className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-1"
+                        >
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                          </svg>
+                          Enhance
+                        </button>
+                      )}
+                      <div className="relative">
+                        <button
+                          type="button"
+                          onClick={() => setShowEmojiBar(!showEmojiBar)}
+                          className="text-xs px-2 py-1 bg-gray-600 text-white rounded hover:bg-gray-500 flex items-center gap-1"
+                          title="Add emoji"
+                        >
+                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="2"/>
+                            <circle cx="8" cy="10" r="1"/>
+                            <circle cx="16" cy="10" r="1"/>
+                            <path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round"/>
+                          </svg>
+                          😊
+                        </button>
+                        {showEmojiBar && (
+                          <div className="absolute bottom-full mb-2 right-0 bg-gray-800 border border-gray-600 rounded-lg shadow-lg z-20 w-80">
+                            {/* Category tabs */}
+                            <div className="flex border-b border-gray-600">
+                              {Object.entries(EMOJI_CATEGORIES).map(([key, category]) => (
+                                <button
+                                  key={key}
+                                  type="button"
+                                  onClick={() => setActiveEmojiCategory(key as keyof typeof EMOJI_CATEGORIES)}
+                                  className={`flex-1 p-2 text-center hover:bg-gray-700 transition-colors ${
+                                    activeEmojiCategory === key ? 'bg-gray-700 border-b-2 border-blue-500' : ''
+                                  }`}
+                                  title={category.name}
+                                >
+                                  {category.icon}
+                                </button>
+                              ))}
+                            </div>
+                            {/* Emoji grid */}
+                            <div className="p-3 max-h-48 overflow-y-auto">
+                              <div className="grid grid-cols-8 gap-1">
+                                {EMOJI_CATEGORIES[activeEmojiCategory].emojis.map((emoji, index) => (
+                                  <button
+                                    key={`schedule-form-${emoji}-${index}`}
+                                    type="button"
+                                    onClick={() => {
+                                      setMessageToSchedule(prev => prev + emoji);
+                                      setShowEmojiBar(false);
+                                    }}
+                                    className="text-xl hover:bg-gray-700 rounded p-1 transition-colors"
+                                    title={emoji}
+                                  >
+                                    {emoji}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                   <textarea
                     value={messageToSchedule}
